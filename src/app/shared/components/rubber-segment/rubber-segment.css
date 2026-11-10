@@ -1,0 +1,96 @@
+.rubber-segment {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: var(--segment-inset);
+  border: 1px solid rgb(203 213 225 / 10%);
+  border-radius: var(--segment-radius);
+  background: var(--segment-track);
+  isolation: isolate;
+}
+
+.rubber-segment--equal {
+  min-width: 26rem;
+}
+
+.rubber-segment--disabled {
+  opacity: 0.65;
+}
+
+.rubber-segment__thumb {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  border-radius: calc(var(--segment-radius) - 2px);
+  background: var(--segment-thumb);
+  box-shadow: 0 0 14px rgb(16 185 129 / 18%);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.rubber-segment__item {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  min-width: 5.25rem;
+  min-height: 42px;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.85rem;
+  border-radius: calc(var(--segment-radius) - 2px);
+  color: var(--segment-text);
+  font-family: var(--font-interface);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 200ms ease,
+    text-shadow 200ms ease;
+}
+
+.rubber-segment--equal .rubber-segment__item {
+  flex: 1 1 0;
+}
+
+.rubber-segment__item--active {
+  color: var(--segment-active-text);
+}
+
+.rubber-segment__item--disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.rubber-segment__item:focus-visible {
+  z-index: 2;
+  outline: 2px solid var(--color-brand-soft);
+  outline-offset: 2px;
+}
+
+.rubber-segment[data-size='sm'] .rubber-segment__item {
+  min-height: 36px;
+  font-size: 0.8rem;
+}
+
+.rubber-segment[data-size='lg'] .rubber-segment__item {
+  min-height: 48px;
+  font-size: 0.95rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rubber-segment__item[href]:not(.rubber-segment__item--active):hover {
+    color: var(--color-brand-soft);
+    text-shadow: 0 0 9px rgb(16 185 129 / 32%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rubber-segment__item {
+    transition: none;
+  }
+}

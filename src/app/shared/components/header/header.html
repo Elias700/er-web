@@ -1,0 +1,77 @@
+<header
+  id="home"
+  tabindex="-1"
+  class="header-shell"
+  [class.header-shell--scrolled]="isScrolled()"
+>
+  <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
+    <a
+      #brandLink
+      href="#home"
+      class="brand-link inline-flex min-h-11 items-center gap-3 rounded-sm"
+      aria-label="Sua marca — início"
+      (click)="onNavigationClick()"
+    >
+      <span class="brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      <span class="font-display text-sm font-semibold tracking-[0.12em] text-white sm:text-base">
+        Sua marca
+      </span>
+    </a>
+
+    <app-rubber-segment
+      class="hidden lg:flex"
+      [items]="navigationItems"
+      [value]="activeNavigation()"
+      [defaultValue]="'home'"
+      [ariaLabel]="'Navegação principal'"
+      (valueChange)="onNavigationSelection($event)"
+    />
+
+    <button
+      #menuToggle
+      type="button"
+      class="inline-flex menu-toggle lg:hidden"
+      [class.menu-toggle--open]="menuOpen()"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="mobile-navigation"
+      [attr.aria-label]="menuOpen() ? 'Fechar menu' : 'Abrir menu'"
+      (click)="toggleMenu()"
+    >
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <nav
+    id="mobile-navigation"
+    class="mobile-panel lg:hidden"
+    aria-label="Navegação principal"
+    [hidden]="!menuOpen()"
+  >
+    <div class="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
+      @for (item of navigationItems; track item.label; let index = $index) {
+        <div class="mobile-nav-row">
+          @if (item.href; as target) {
+            <a
+              #firstMobileLink
+              class="mobile-nav-link mobile-nav-link--enabled"
+              [href]="target"
+              [class.mobile-nav-link--current]="activeNavigation() === item.value"
+              [attr.aria-current]="activeNavigation() === item.value ? 'location' : null"
+              (click)="onMobileNavigation(item)"
+            >
+              <span class="mobile-nav-number" aria-hidden="true">0{{ index + 1 }} /</span>
+              <span>{{ item.label }}</span>
+            </a>
+          } @else {
+            <span class="mobile-nav-link mobile-nav-link--disabled" aria-disabled="true">
+              <span class="mobile-nav-number" aria-hidden="true">0{{ index + 1 }} /</span>
+              <span>{{ item.label }}</span>
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </nav>
+</header>

@@ -1,0 +1,40 @@
+<nav
+  #track
+  class="rubber-segment"
+  [class.rubber-segment--equal]="equalSlots()"
+  [class.rubber-segment--disabled]="disabled()"
+  [attr.data-size]="size()"
+  [attr.aria-label]="ariaLabel()"
+  [style.--segment-track]="trackColor()"
+  [style.--segment-thumb]="thumbColor()"
+  [style.--segment-text]="textColor()"
+  [style.--segment-active-text]="activeTextColor()"
+  [style.--segment-radius]="radius()"
+  [style.--segment-inset]="inset() + 'px'"
+>
+  <span #thumb class="rubber-segment__thumb" aria-hidden="true"></span>
+  @for (item of items(); track item.value) {
+    @if (isItemEnabled(item)) {
+      <a
+        #segmentItem
+        class="rubber-segment__item"
+        [class.rubber-segment__item--active]="isSelected(item)"
+        [attr.data-segment-value]="item.value"
+        [attr.aria-current]="isSelected(item) ? 'location' : null"
+        [href]="item.href"
+        (click)="onItemClick(item)"
+      >
+        {{ item.label }}
+      </a>
+    } @else {
+      <span
+        #segmentItem
+        class="rubber-segment__item rubber-segment__item--disabled"
+        [attr.data-segment-value]="item.value"
+        aria-disabled="true"
+      >
+        {{ item.label }}
+      </span>
+    }
+  }
+</nav>
