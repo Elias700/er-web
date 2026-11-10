@@ -1,3 +1,39 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  --color-brand-ink: #071713;
+  --color-brand-surface: #0b1f1a;
+  --color-brand-primary: #10b981;
+  --color-brand-hover: #059669;
+  --color-brand-muted: #cbd5e1;
+  --color-brand-soft: #d1fae5;
+  --color-brand-light: #f8fafc;
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-interface: 'Inter', 'Segoe UI', sans-serif;
+}
+
+html {
+  scroll-padding-top: 5.5rem;
+}
+
+:target {
+  scroll-margin-top: 5.5rem;
+}
+
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--color-brand-ink);
+  color: var(--color-white);
+  font-family: var(--font-interface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
