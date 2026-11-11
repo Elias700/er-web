@@ -1,144 +1,141 @@
 <section class="work-section" id="trabalhos" aria-labelledby="work-title">
   <div class="work-section__inner">
     <header class="work-section__intro">
-      <p class="work-section__eyebrow">Portfólio</p>
-      <h2 class="work-section__title" id="work-title">Veja meu trabalho na prática</h2>
+      <div class="work-section__eyebrow" aria-label="Portfólio">
+        <span aria-hidden="true"></span>
+        <p>Portfólio</p>
+        <span aria-hidden="true"></span>
+      </div>
+      <h2 class="work-section__title" id="work-title">Projetos que ganham vida na tela</h2>
       <p class="work-section__description">
-        Sites e landing pages criados para apresentar serviços e facilitar o primeiro contato com o cliente.
+        Explore os sites e veja como cada negócio foi apresentado.
       </p>
     </header>
 
-    <div
-      class="work-carousel"
-      [class.work-carousel--single]="!hasMultipleProjects()"
-      [attr.aria-roledescription]="hasMultipleProjects() ? 'carrossel' : null"
-      aria-label="Projetos do portfólio"
-      (pointerdown)="onPointerDown($event)"
-      (pointerup)="onPointerUp($event)"
-      (pointercancel)="onPointerCancel()"
-    >
-      <div class="work-carousel__stage">
-        @for (project of projects; track project.id; let index = $index) {
-          <article
-            class="work-card"
-            [class.work-card--active]="isActive(index)"
-            [class.work-card--previous]="isPrevious(index) && hasMultipleProjects()"
-            [class.work-card--next]="isNext(index) && hasMultipleProjects()"
-            [class.work-card--hidden]="!isActive(index) && !isPrevious(index) && !isNext(index)"
-            [attr.aria-hidden]="!isActive(index)"
-          >
-            <div class="work-phone" aria-label="Prévia do site">
-              <div class="work-phone__camera" aria-hidden="true"></div>
-              <div class="work-phone__screen">
-                @if (isActive(index)) {
-                  @if (currentScreen(); as screen) {
-                    <iframe
-                      class="work-phone__frame"
-                      [src]="screen.url"
-                      title="Prévia navegável do site Robert Solar"
-                      loading="lazy"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                    ></iframe>
-                  } @else if (project.imageSrc; as imageSrc) {
-                    <img
-                      class="work-phone__image"
-                      [src]="imageSrc"
-                      [alt]="'Captura do site ' + project.name"
-                      width="360"
-                      height="720"
-                      loading="lazy"
-                    />
-                  } @else {
-                    <div class="work-phone__pending" aria-label="Prévia do projeto pendente">
-                      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-                        <rect x="11" y="5" width="26" height="38" rx="5" />
-                        <path d="M18 11h12M20 37h8" />
-                      </svg>
-                      <span>Prévia do projeto pendente</span>
-                    </div>
-                  }
-                } @else if (project.imageSrc; as imageSrc) {
-                  <img
-                    class="work-phone__image"
-                    [src]="imageSrc"
-                    [alt]="'Captura do site ' + project.name"
-                    width="360"
-                    height="720"
-                    loading="lazy"
-                  />
-                } @else {
-                  <div class="work-phone__pending" aria-label="Prévia do projeto pendente">
-                    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-                      <rect x="11" y="5" width="26" height="38" rx="5" />
-                      <path d="M18 11h12M20 37h8" />
-                    </svg>
-                    <span>Prévia do projeto pendente</span>
-                  </div>
-                }
+    <div class="work-showcase">
+      <div class="work-showcase__device-column">
+        <div class="work-phone" aria-label="Prévia navegável do projeto selecionado">
+          <div class="work-phone__camera" aria-hidden="true"></div>
+          <div class="work-phone__screen">
+            @if (currentProject(); as project) {
+              <iframe
+                class="work-phone__frame"
+                [src]="project.previewUrl"
+                [title]="'Prévia navegável do site ' + project.name"
+                loading="eager"
+                referrerpolicy="strict-origin-when-cross-origin"
+                (load)="onFrameLoad()"
+              ></iframe>
+            }
+            @if (isFrameLoading()) {
+              <div class="work-phone__loading" aria-live="polite">
+                <span class="work-phone__spinner" aria-hidden="true"></span>
+                <span>Carregando prévia…</span>
               </div>
-            </div>
-          </article>
+            }
+          </div>
+        </div>
+        <p class="work-phone__hint">Role dentro da tela para explorar o site</p>
+      </div>
+
+      @if (currentProject(); as project) {
+        <article
+          class="work-project"
+          [class.work-project--transitioning]="isTransitioning()"
+        >
+          <p class="work-project__category">{{ project.category }}</p>
+          <h3 class="work-project__name">{{ project.name }}</h3>
+          <p class="work-project__description">{{ project.description }}</p>
+
+          @if (project.isDemo) {
+            <p class="work-project__demo">Projeto demonstrativo</p>
+          }
+
+          <ul class="work-project__tags" aria-label="Características do projeto">
+            @for (tag of project.tags; track tag) {
+              <li>{{ tag }}</li>
+            }
+          </ul>
+
+          <a
+            class="work-project__link"
+            [href]="project.websiteUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visitar site
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M4 10h11m-5-5 5 5-5 5" />
+            </svg>
+          </a>
+        </article>
+      }
+    </div>
+
+    <nav class="work-gallery" aria-label="Projetos do portfólio">
+      <button
+        class="work-gallery__arrow"
+        type="button"
+        aria-label="Projeto anterior"
+        (click)="previousProject()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </button>
+
+      <div class="work-gallery__track">
+        @for (project of projects; track project.id; let index = $index) {
+          <button
+            class="work-thumbnail"
+            [class.work-thumbnail--active]="isActive(index)"
+            type="button"
+            [attr.aria-pressed]="isActive(index)"
+            [attr.aria-label]="project.name + ', ' + project.category + (project.isDemo ? ', projeto demonstrativo' : '')"
+            (click)="selectProject(index)"
+          >
+            <span
+              class="work-thumbnail__image-wrap"
+              [class.work-thumbnail__image-wrap--active]="isActive(index)"
+            >
+              <img
+                class="work-thumbnail__image"
+                [src]="project.thumbnailUrl"
+                [alt]="project.thumbnailAlt"
+                width="1672"
+                height="941"
+                loading="lazy"
+              />
+              @if (project.isDemo) {
+                <span class="work-thumbnail__demo">Demonstrativo</span>
+              }
+              @if (isActive(index)) {
+                <span class="work-thumbnail__selected" aria-hidden="true"></span>
+              }
+            </span>
+            <span class="work-thumbnail__meta">
+              <span class="work-thumbnail__name">{{ project.name }}</span>
+              <span class="work-thumbnail__category">{{ project.category }}</span>
+            </span>
+          </button>
         }
       </div>
 
-      @if (currentScreen()) {
-        <nav class="work-screen-nav" aria-label="Telas do projeto Robert Solar">
-          @for (screen of currentProject().previewScreens; track screen.id; let index = $index) {
-            <button
-              class="work-screen-nav__item"
-              type="button"
-              [class.work-screen-nav__item--active]="isCurrentScreen(index)"
-              [attr.aria-pressed]="isCurrentScreen(index)"
-              (click)="selectScreen(index)"
-            >
-              {{ screen.label }}
-            </button>
-          }
-        </nav>
-        <p class="work-project__hint">Role dentro da tela para explorar o site</p>
-      }
+      <button
+        class="work-gallery__arrow"
+        type="button"
+        aria-label="Próximo projeto"
+        (click)="nextProject()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </button>
+    </nav>
 
-      @if (currentProject(); as project) {
-        <div class="work-project" aria-live="polite" aria-atomic="true">
-          <p class="work-project__type">{{ project.type }}</p>
-          <h3 class="work-project__name">{{ project.name }}</h3>
-          <p class="work-project__description">{{ project.description }}</p>
-          @if (project.websiteUrl; as websiteUrl) {
-            <a class="work-project__link" [href]="websiteUrl" target="_blank" rel="noopener noreferrer">
-              Visitar site
-              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M4 10h11m-5-5 5 5-5 5" />
-              </svg>
-            </a>
-          }
-        </div>
-      }
-
-      @if (hasMultipleProjects()) {
-        <nav class="work-carousel__controls" aria-label="Navegação do portfólio">
-          <button
-            class="work-carousel__arrow"
-            type="button"
-            aria-label="Projeto anterior"
-            (click)="previousProject()"
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </button>
-          <span class="work-carousel__position" aria-live="polite">{{ positionLabel() }}</span>
-          <button
-            class="work-carousel__arrow"
-            type="button"
-            aria-label="Próximo projeto"
-            (click)="nextProject()"
-          >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
-        </nav>
-      }
-    </div>
+    <p class="work-gallery__position" aria-live="polite">{{ positionLabel() }}</p>
+    <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+      Projeto selecionado: {{ currentProject().name }}
+    </p>
   </div>
 </section>

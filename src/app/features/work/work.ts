@@ -7,23 +7,45 @@ import {
 } from '@angular/core';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 
-const ROBERT_SOLAR_URL = 'https://robertsolar.com.br/';
-
-interface WorkPreviewScreen {
-  readonly id: string;
-  readonly label: string;
-  readonly url: SafeResourceUrl;
-}
-
 interface WorkProject {
   readonly id: string;
   readonly name: string;
-  readonly type: string;
+  readonly category: string;
   readonly description: string;
-  readonly imageSrc: string | null;
-  readonly previewScreens: readonly WorkPreviewScreen[];
-  readonly websiteUrl: string | null;
+  readonly tags: readonly string[];
+  readonly websiteUrl: string;
+  readonly previewUrl: SafeResourceUrl;
+  readonly thumbnailUrl: string;
+  readonly thumbnailAlt: string;
+  readonly isDemo: boolean;
 }
+
+const projectsData = [
+  {
+    id: 'robert-solar',
+    name: 'Robert Solar',
+    category: 'Landing page',
+    description:
+      'Página para apresentar serviços de consultoria em energia solar e facilitar o contato pelo WhatsApp.',
+    tags: ['Responsivo', 'WhatsApp', 'Página única'],
+    websiteUrl: 'https://robertsolar.com.br/',
+    thumbnailUrl: '/assets/work/robert-solar.webp',
+    thumbnailAlt: 'Apresentação ilustrativa do projeto Robert Solar',
+    isDemo: false
+  },
+  {
+    id: 'modelo-advocacia',
+    name: 'Modelo de Advocacia',
+    category: 'Site demonstrativo',
+    description:
+      'Modelo de site para apresentar um escritório de advocacia, suas áreas de atuação e seus canais de contato.',
+    tags: ['Projeto demonstrativo'],
+    websiteUrl: 'https://modelo-advocacia-ecru.vercel.app/',
+    thumbnailUrl: '/assets/work/modelo-advocacia.webp',
+    thumbnailAlt: 'Apresentação ilustrativa do projeto Modelo de Advocacia',
+    isDemo: true
+  }
+] as const;
 
 @Component({
   selector: 'app-work',
@@ -35,106 +57,63 @@ interface WorkProject {
 export class WorkComponent {
   private readonly sanitizer = inject(DomSanitizer);
 
-  protected readonly projects: readonly WorkProject[] = [
-    {
-      id: 'robert-solar',
-      name: 'Robert Solar',
-      type: 'Landing page',
-      description:
-        'Página para apresentar os serviços de consultoria em energia solar e facilitar o contato pelo WhatsApp.',
-      imageSrc: null,
-      previewScreens: [
-        {
-          id: 'inicio',
-          label: 'Início',
-          url: this.sanitizer.bypassSecurityTrustResourceUrl(ROBERT_SOLAR_URL)
-        },
-        {
-          id: 'vantagens',
-          label: 'Vantagens',
-          url: this.sanitizer.bypassSecurityTrustResourceUrl(`${ROBERT_SOLAR_URL}#vantagens`)
-        },
-        {
-          id: 'sobre',
-          label: 'Sobre',
-          url: this.sanitizer.bypassSecurityTrustResourceUrl(`${ROBERT_SOLAR_URL}#sobre`)
-        }
-      ],
-      websiteUrl: ROBERT_SOLAR_URL
-    }
-  ];
+  protected readonly projects: readonly WorkProject[] = projectsData.map((project) => ({
+    ...project,
+    previewUrl: this.sanitizer.bypassSecurityTrustResourceUrl(project.websiteUrl)
+  }));
 
   protected readonly activeIndex = signal(0);
-  protected readonly activeScreenIndex = signal(0);
+  protected readonly isFrameLoading = signal(true);
+  protected readonly isTransitioning = signal(false);
   protected readonly currentProject = computed(() => this.projects[this.activeIndex()]);
-  protected readonly currentScreen = computed(
-    () => this.currentProject().previewScreens[this.activeScreenIndex()]
-  );
-  protected readonly hasMultipleProjects = computed(() => this.projects.length > 1);
   protected readonly positionLabel = computed(
-    () => `${this.activeIndex() + 1} / ${this.projects.length}`
+    () => `${String(this.activeIndex() + 1).padStart(2, '0')} / ${String(this.projects.length).padStart(2, '0')}`
   );
 
-  private pointerStartX: number | null = null;
+  private frameTimer: ReturnType<typeof setTimeout> | undefined;
+  private transitionTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected isActive(index: number): boolean {
     return index === this.activeIndex();
   }
 
-  protected isPrevious(index: number): boolean {
-    return index === this.wrapIndex(this.activeIndex() - 1);
-  }
-
-  protected isNext(index: number): boolean {
-    return index === this.wrapIndex(this.activeIndex() + 1);
-  }
-
-  protected isCurrentScreen(index: number): boolean {
-    return index === this.activeScreenIndex();
-  }
-
-  protected selectScreen(index: number): void {
-    if (index >= 0 && index < this.currentProject().previewScreens.length) {
-      this.activeScreenIndex.set(index);
-    }
-  }
-
-  protected previousProject(): void {
-    if (this.hasMultipleProjects()) {
-      this.activeIndex.update((index) => this.wrapIndex(index - 1));
-      this.activeScreenIndex.set(0);
-    }
-  }
-
-  protected nextProject(): void {
-    if (this.hasMultipleProjects()) {
-      this.activeIndex.update((index) => this.wrapIndex(index + 1));
-      this.activeScreenIndex.set(0);
-    }
-  }
-
-  protected onPointerDown(event: PointerEvent): void {
-    this.pointerStartX = event.pointerType === 'touch' ? event.clientX : null;
-  }
-
-  protected onPointerUp(event: PointerEvent): void {
-    if (this.pointerStartX === null) {
+  protected selectProject(index: number): void {
+    if (index < 0 || index >= this.projects.length || index === this.activeIndex()) {
       return;
     }
 
-    const distance = event.clientX - this.pointerStartX;
-    this.pointerStartX = null;
+    this.clearTimers();
+    this.isTransitioning.set(true);
+    this.isFrameLoading.set(true);
+    this.activeIndex.set(index);
+    this.transitionTimer = setTimeout(() => this.isTransitioning.set(false), 250);
+  }
 
-    if (Math.abs(distance) >= 40) {
-      distance > 0 ? this.previousProject() : this.nextProject();
+  protected previousProject(): void {
+    this.selectProject((this.activeIndex() - 1 + this.projects.length) % this.projects.length);
+  }
+
+  protected nextProject(): void {
+    this.selectProject((this.activeIndex() + 1) % this.projects.length);
+  }
+
+  protected onFrameLoad(): void {
+    if (this.frameTimer) {
+      clearTimeout(this.frameTimer);
     }
+
+    this.frameTimer = setTimeout(() => this.isFrameLoading.set(false), 350);
   }
 
-  protected onPointerCancel(): void {
-    this.pointerStartX = null;
-  }
+  private clearTimers(): void {
+    if (this.frameTimer) {
+      clearTimeout(this.frameTimer);
+      this.frameTimer = undefined;
+    }
 
-  private wrapIndex(index: number): number {
-    return (index + this.projects.length) % this.projects.length;
+    if (this.transitionTimer) {
+      clearTimeout(this.transitionTimer);
+      this.transitionTimer = undefined;
+    }
   }
 }
