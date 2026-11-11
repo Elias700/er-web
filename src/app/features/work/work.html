@@ -1,0 +1,144 @@
+<section class="work-section" id="trabalhos" aria-labelledby="work-title">
+  <div class="work-section__inner">
+    <header class="work-section__intro">
+      <p class="work-section__eyebrow">Portfólio</p>
+      <h2 class="work-section__title" id="work-title">Veja meu trabalho na prática</h2>
+      <p class="work-section__description">
+        Sites e landing pages criados para apresentar serviços e facilitar o primeiro contato com o cliente.
+      </p>
+    </header>
+
+    <div
+      class="work-carousel"
+      [class.work-carousel--single]="!hasMultipleProjects()"
+      [attr.aria-roledescription]="hasMultipleProjects() ? 'carrossel' : null"
+      aria-label="Projetos do portfólio"
+      (pointerdown)="onPointerDown($event)"
+      (pointerup)="onPointerUp($event)"
+      (pointercancel)="onPointerCancel()"
+    >
+      <div class="work-carousel__stage">
+        @for (project of projects; track project.id; let index = $index) {
+          <article
+            class="work-card"
+            [class.work-card--active]="isActive(index)"
+            [class.work-card--previous]="isPrevious(index) && hasMultipleProjects()"
+            [class.work-card--next]="isNext(index) && hasMultipleProjects()"
+            [class.work-card--hidden]="!isActive(index) && !isPrevious(index) && !isNext(index)"
+            [attr.aria-hidden]="!isActive(index)"
+          >
+            <div class="work-phone" aria-label="Prévia do site">
+              <div class="work-phone__camera" aria-hidden="true"></div>
+              <div class="work-phone__screen">
+                @if (isActive(index)) {
+                  @if (currentScreen(); as screen) {
+                    <iframe
+                      class="work-phone__frame"
+                      [src]="screen.url"
+                      title="Prévia navegável do site Robert Solar"
+                      loading="lazy"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                    ></iframe>
+                  } @else if (project.imageSrc; as imageSrc) {
+                    <img
+                      class="work-phone__image"
+                      [src]="imageSrc"
+                      [alt]="'Captura do site ' + project.name"
+                      width="360"
+                      height="720"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div class="work-phone__pending" aria-label="Prévia do projeto pendente">
+                      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                        <rect x="11" y="5" width="26" height="38" rx="5" />
+                        <path d="M18 11h12M20 37h8" />
+                      </svg>
+                      <span>Prévia do projeto pendente</span>
+                    </div>
+                  }
+                } @else if (project.imageSrc; as imageSrc) {
+                  <img
+                    class="work-phone__image"
+                    [src]="imageSrc"
+                    [alt]="'Captura do site ' + project.name"
+                    width="360"
+                    height="720"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="work-phone__pending" aria-label="Prévia do projeto pendente">
+                    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+                      <rect x="11" y="5" width="26" height="38" rx="5" />
+                      <path d="M18 11h12M20 37h8" />
+                    </svg>
+                    <span>Prévia do projeto pendente</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (currentScreen()) {
+        <nav class="work-screen-nav" aria-label="Telas do projeto Robert Solar">
+          @for (screen of currentProject().previewScreens; track screen.id; let index = $index) {
+            <button
+              class="work-screen-nav__item"
+              type="button"
+              [class.work-screen-nav__item--active]="isCurrentScreen(index)"
+              [attr.aria-pressed]="isCurrentScreen(index)"
+              (click)="selectScreen(index)"
+            >
+              {{ screen.label }}
+            </button>
+          }
+        </nav>
+        <p class="work-project__hint">Role dentro da tela para explorar o site</p>
+      }
+
+      @if (currentProject(); as project) {
+        <div class="work-project" aria-live="polite" aria-atomic="true">
+          <p class="work-project__type">{{ project.type }}</p>
+          <h3 class="work-project__name">{{ project.name }}</h3>
+          <p class="work-project__description">{{ project.description }}</p>
+          @if (project.websiteUrl; as websiteUrl) {
+            <a class="work-project__link" [href]="websiteUrl" target="_blank" rel="noopener noreferrer">
+              Visitar site
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 10h11m-5-5 5 5-5 5" />
+              </svg>
+            </a>
+          }
+        </div>
+      }
+
+      @if (hasMultipleProjects()) {
+        <nav class="work-carousel__controls" aria-label="Navegação do portfólio">
+          <button
+            class="work-carousel__arrow"
+            type="button"
+            aria-label="Projeto anterior"
+            (click)="previousProject()"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+          <span class="work-carousel__position" aria-live="polite">{{ positionLabel() }}</span>
+          <button
+            class="work-carousel__arrow"
+            type="button"
+            aria-label="Próximo projeto"
+            (click)="nextProject()"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </nav>
+      }
+    </div>
+  </div>
+</section>
