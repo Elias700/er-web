@@ -33,7 +33,7 @@ export class HeaderComponent {
   protected readonly activeNavigation = signal('home');
   protected readonly navigationItems: readonly RubberSegmentItem[] = [
     { value: 'home', label: 'Home', href: '#home' },
-    { value: 'trabalhos', label: 'Trabalhos', href: null },
+    { value: 'trabalhos', label: 'Trabalhos', href: '#trabalhos' },
     { value: 'planos', label: 'Planos', href: null },
     { value: 'contato', label: 'Contato', href: null }
   ];
