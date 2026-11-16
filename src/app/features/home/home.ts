@@ -9,13 +9,11 @@ import { HeroVisualDirective } from './hero-visual.directive';
 import {
   AboutSectionComponent,
   ContactSectionComponent,
-  DifferentialsSectionComponent,
   FaqSectionComponent,
   FinalCtaSectionComponent,
   FooterSectionComponent,
   ProcessSectionComponent,
   ServicesSectionComponent,
-  TechnologiesSectionComponent,
   TestimonialsSectionComponent,
 } from '../sections/sections';
 
@@ -30,8 +28,6 @@ import {
     HeroVisualDirective,
     ServicesSectionComponent,
     ProcessSectionComponent,
-    DifferentialsSectionComponent,
-    TechnologiesSectionComponent,
     AboutSectionComponent,
     TestimonialsSectionComponent,
     FaqSectionComponent,

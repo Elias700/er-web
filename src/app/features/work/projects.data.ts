@@ -29,7 +29,7 @@ export const projects: readonly ProjectData[] = [
     category: 'Site demonstrativo',
     description:
       'Modelo de site para apresentar um escritório de advocacia, suas áreas de atuação e seus canais de contato.',
-    tags: ['Projeto demonstrativo'],
+    tags: [],
     websiteUrl: 'https://modelo-advocacia-ecru.vercel.app/',
     thumbnailUrl: '/assets/work/modelo-advocacia.webp',
     thumbnailAlt: 'Apresentação ilustrativa do projeto Modelo de Advocacia',

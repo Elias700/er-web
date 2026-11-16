@@ -1,7 +1,5 @@
 app-services,
 app-process,
-app-differentials,
-app-technologies,
 app-about,
 app-testimonials,
 app-faq,
@@ -118,15 +116,13 @@ app-site-footer {
   scale: 1.08;
 }
 .service-card h3,
-.process-step h3,
-.benefit-list h3 {
+.process-step h3 {
   margin: 0 0 0.5rem;
   font-family: var(--font-display);
   font-size: 1.15rem;
 }
 .service-card p,
-.process-step p,
-.benefit-list p {
+.process-step p {
   margin: 0;
   color: var(--color-section-muted);
   line-height: 1.65;
@@ -186,7 +182,6 @@ app-site-footer {
 .process-step p {
   color: #cbd5e1;
 }
-.differential-layout,
 .faq-layout,
 .contact-layout,
 .about-layout {
@@ -194,79 +189,6 @@ app-site-footer {
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: clamp(2rem, 7vw, 6rem);
   align-items: start;
-}
-.benefit-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.benefit-list li {
-  display: flex;
-  gap: 0.75rem;
-}
-.benefit-list li > span {
-  color: #047857;
-  font-weight: 700;
-}
-.metrics-placeholder {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 1px solid #cbd5e1;
-}
-.metrics-placeholder p {
-  display: grid;
-  gap: 0.35rem;
-  margin: 0;
-}
-.metrics-placeholder strong {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-}
-.metrics-placeholder span {
-  color: #475569;
-  font-size: 0.9rem;
-}
-.tech-section {
-  overflow: hidden;
-  background: var(--color-brand-soft);
-  color: var(--color-brand-text);
-}
-.tech-section .section-heading {
-  margin-bottom: 2rem;
-}
-.tech-marquee {
-  display: flex;
-  width: max-content;
-  animation: tech-scroll 28s linear infinite;
-}
-.tech-marquee ul {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 1rem;
-  margin: 0;
-  padding: 0 1rem 0 0;
-  list-style: none;
-}
-.tech-marquee li {
-  padding: 0.8rem 1.3rem;
-  border: 1px solid rgb(15 23 42 / 14%);
-  border-radius: 999px;
-  background: rgb(255 255 255 / 65%);
-  font-family: var(--font-display);
-  font-weight: 600;
-  white-space: nowrap;
-}
-@keyframes tech-scroll {
-  to {
-    transform: translateX(-50%);
-  }
 }
 .about-layout {
   align-items: center;
@@ -290,8 +212,41 @@ app-site-footer {
 .about-photo small {
   color: #cbd5e1;
 }
+.about-section {
+  background: var(--color-brand-ink);
+}
 .about-copy h2 {
   margin-bottom: 1.25rem;
+}
+.about-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.about-highlights li {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid rgb(209 250 229 / 16%);
+  border-radius: 0.8rem;
+  background: rgb(255 255 255 / 3%);
+}
+.about-highlights span {
+  color: var(--color-brand-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.about-highlights strong {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
 }
 .testimonial-placeholder {
   max-width: 50rem;
@@ -524,7 +479,6 @@ app-site-footer {
   .service-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .differential-layout,
   .faq-layout,
   .contact-layout,
   .about-layout {
@@ -541,8 +495,7 @@ app-site-footer {
   }
   .service-grid,
   .process-list,
-  .benefit-list,
-  .metrics-placeholder {
+  .about-highlights {
     grid-template-columns: 1fr;
   }
   .service-card {
@@ -560,14 +513,8 @@ app-site-footer {
   .back-to-top {
     justify-self: start;
   }
-  .tech-marquee {
-    animation-duration: 38s;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tech-marquee {
-    animation: none;
-  }
   .process-line-fill {
     transform: scaleY(1);
   }

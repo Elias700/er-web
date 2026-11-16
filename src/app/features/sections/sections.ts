@@ -128,92 +128,11 @@ export class ProcessSectionComponent {
 }
 
 @Component({
-  selector: 'app-differentials',
-  standalone: true,
-  imports: [RevealDirective],
-  template: ` <section
-    class="content-section section-light"
-    id="diferenciais"
-    aria-labelledby="differentials-title"
-  >
-    <div class="section-wrap differential-layout">
-      <header class="section-heading section-heading--left" appReveal>
-        <p class="section-kicker">Feito para o seu contexto</p>
-        <h2 id="differentials-title">Uma base bem cuidada para sua presença digital</h2>
-        <p>Decisões de projeto voltadas à clareza, à experiência em celular e à manutenção.</p>
-      </header>
-      <ul class="benefit-list">
-        @for (benefit of benefits; track benefit.title) {
-          <li appReveal>
-            <span aria-hidden="true">✓</span>
-            <div>
-              <h3>{{ benefit.title }}</h3>
-              <p>{{ benefit.description }}</p>
-            </div>
-          </li>
-        }
-      </ul>
-    </div>
-    <div class="section-wrap metrics-placeholder" aria-label="Indicadores a preencher">
-      <p><strong>A definir</strong><span>Projetos entregues</span></p>
-      <p><strong>A definir</strong><span>Anos de experiência</span></p>
-      <p><strong>A definir</strong><span>Clientes atendidos</span></p>
-    </div>
-    <!-- TODO: substituir os indicadores apenas por dados confirmados -->
-  </section>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class DifferentialsSectionComponent {
-  readonly benefits = [
-    { title: 'Responsivo', description: 'Layout pensado para telas pequenas, médias e grandes.' },
-    { title: 'Performance', description: 'Atenção ao peso e ao carregamento das páginas.' },
-    { title: 'SEO técnico', description: 'Estrutura semântica e metadados organizados.' },
-    { title: 'Prazo alinhado', description: 'Etapas e calendário combinados conforme o escopo.' },
-  ] as const;
-}
-
-@Component({
-  selector: 'app-technologies',
-  standalone: true,
-  imports: [RevealDirective],
-  template: ` <section
-    class="content-section tech-section"
-    id="tecnologias"
-    aria-labelledby="tech-title"
-  >
-    <div class="section-wrap">
-      <header class="section-heading" appReveal>
-        <p class="section-kicker">Ferramentas</p>
-        <h2 id="tech-title">Tecnologias e recursos</h2>
-        <p>Uma seleção definida conforme cada projeto.</p>
-      </header>
-      <div class="tech-marquee" aria-label="Tecnologias usadas">
-        <ul>
-          @for (tech of technologies; track tech) {
-            <li>{{ tech }}</li>
-          }
-        </ul>
-        <ul aria-hidden="true">
-          @for (tech of technologies; track tech) {
-            <li>{{ tech }}</li>
-          }
-        </ul>
-      </div>
-    </div>
-    <!-- TODO: confirmar a lista de tecnologias da ER WEB -->
-  </section>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class TechnologiesSectionComponent {
-  readonly technologies = ['Angular', 'TypeScript', 'Node.js', 'Figma', 'HTML', 'CSS'];
-}
-
-@Component({
   selector: 'app-about',
   standalone: true,
   imports: [ParallaxDirective, RevealDirective],
   template: ` <section
-    class="content-section section-dark"
+    class="content-section section-dark about-section"
     id="sobre"
     aria-labelledby="about-title"
   >
@@ -222,22 +141,33 @@ export class TechnologiesSectionComponent {
         class="about-photo"
         [appParallax]="18"
         role="img"
-        aria-label="Espaço reservado para foto de quem está por trás da ER WEB"
+        aria-label="Espaço reservado para a foto do desenvolvedor da ER WEB"
       >
-        <span>Foto</span><small>A definir</small>
+        <span>Foto</span><small>Em breve</small>
       </div>
+      <!-- TODO: substituir pelo arquivo da foto quando for enviado -->
       <div class="about-copy" appReveal>
-        <p class="section-kicker">Sobre</p>
-        <h2 id="about-title">Tecnologia próxima da realidade do seu negócio</h2>
+        <p class="section-kicker">Sobre mim</p>
+        <h2 id="about-title">Quem está por trás da ER WEB</h2>
         <p>
-          A ER WEB desenvolve experiências para empresas e profissionais que querem apresentar seu
-          trabalho com clareza na internet.
+          Sou desenvolvedor web e crio sites para empresas e profissionais que querem apresentar seu
+          trabalho com clareza na internet. Em cada projeto, sigo boas práticas de programação e de
+          design para entregar páginas rápidas, organizadas e fáceis de usar em qualquer tela.
         </p>
         <p>
-          O projeto é construído em conjunto, com escopo e conteúdo alinhados ao que você precisa
-          comunicar.
+          Sou formado em Licenciatura em Pedagogia, e essa formação aparece no meu jeito de
+          trabalhar: escuto com atenção, explico cada etapa sem termos complicados e organizo o
+          conteúdo para que seu público entenda sua mensagem logo de primeira.
         </p>
-        <!-- TODO: substituir por apresentação pessoal real -->
+        <p>
+          Hoje curso Análise e Desenvolvimento de Sistemas, o que me mantém estudando e atualizado
+          sobre as ferramentas e os métodos que uso no dia a dia.
+        </p>
+        <ul class="about-highlights" aria-label="Formação e atuação">
+          <li><span>Atuação</span><strong>Desenvolvimento web</strong></li>
+          <li><span>Formação</span><strong>Licenciatura em Pedagogia</strong></li>
+          <li><span>Cursando</span><strong>Análise e Desenvolvimento de Sistemas</strong></li>
+        </ul>
       </div>
     </div>
   </section>`,
@@ -483,8 +413,6 @@ export class FooterSectionComponent {
 export const LANDING_SECTION_COMPONENTS = [
   ServicesSectionComponent,
   ProcessSectionComponent,
-  DifferentialsSectionComponent,
-  TechnologiesSectionComponent,
   AboutSectionComponent,
   TestimonialsSectionComponent,
   FaqSectionComponent,

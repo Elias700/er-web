@@ -52,11 +52,13 @@
             <p class="work-project__demo">Projeto demonstrativo</p>
           }
 
-          <ul class="work-project__tags" aria-label="Características do projeto">
-            @for (tag of project.tags; track tag) {
-              <li>{{ tag }}</li>
-            }
-          </ul>
+          @if (project.tags.length) {
+            <ul class="work-project__tags" aria-label="Características do projeto">
+              @for (tag of project.tags; track tag) {
+                <li>{{ tag }}</li>
+              }
+            </ul>
+          }
 
           <a
             class="work-project__link"
