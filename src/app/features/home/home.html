@@ -6,26 +6,27 @@
     <div class="hero__copy" appStagger="[data-stagger-item]">
       <p class="hero__eyebrow" data-stagger-item>
         <span class="hero__eyebrow-mark" aria-hidden="true"></span>
-        Sites para MEIs e pequenos negócios
+        Para empresas e profissionais
       </p>
 
       <h1
         class="hero__title"
         id="home-title"
-        aria-label="Sites profissionais para pequenos negócios."
+        aria-label="Sites profissionais para o seu negócio."
         appSplitText
       >
-        <span data-split-word aria-hidden="true">Sites</span>
-        <span data-split-word aria-hidden="true">profissionais</span>
-        <span data-split-word aria-hidden="true">para</span>
+        <span data-split-word aria-hidden="true">Sites </span>
+        <span data-split-word aria-hidden="true">profissionais </span>
+        <span data-split-word aria-hidden="true">para </span>
+        <span data-split-word aria-hidden="true">o </span>
         <span class="hero__title-accent" data-split-word aria-hidden="true"
-          >pequenos negócios.</span
+          >seu negócio.</span
         >
       </h1>
 
       <p class="hero__description" data-stagger-item>
-        A ER Web cria sites e landing pages para apresentar seus serviços e facilitar o contato dos
-        clientes pelo WhatsApp.
+        A ER Web cria sites e landing pages para apresentar seus serviços, fortalecer sua presença
+        digital e facilitar o contato com seus clientes pelo WhatsApp.
       </p>
 
       <div class="hero__actions" data-stagger-item>
@@ -38,92 +39,34 @@
       </div>
     </div>
 
-    <div class="hero__visual" aria-hidden="true" [appParallax]="18">
-      <svg
-        class="hero-orbit"
-        viewBox="0 0 700 450"
-        preserveAspectRatio="none"
-        focusable="false"
-        pointer-events="none"
-      >
-        <path
-          id="home-orbit-path"
-          class="hero-orbit__track"
-          fill="none"
-          stroke="var(--color-brand-primary)"
-          stroke-opacity="0.42"
-          stroke-width="1"
-          d="M 70 211.5 C 70 104.7 149 18 350 18 C 551 18 630 104.7 630 211.5 C 630 318.3 551 405 350 405 C 149 405 70 318.3 70 211.5 Z"
-        />
-        <ellipse
-          class="hero-orbit__track hero-orbit__track--secondary"
-          fill="none"
-          stroke="var(--color-brand-primary)"
-          stroke-opacity="0.24"
-          stroke-width="1"
-          cx="350"
-          cy="211.5"
-          rx="286"
-          ry="151"
-          transform="rotate(18 350 211.5)"
-        />
-        <g class="hero-orbit__point">
-          <circle
-            class="hero-orbit__halo"
-            r="9"
-            fill="var(--color-brand-primary)"
-            fill-opacity="0.25"
-          />
-          <circle class="hero-orbit__core" r="3" fill="var(--color-brand-soft)" />
-          <animateMotion dur="4s" repeatCount="indefinite">
-            <mpath href="#home-orbit-path" />
-          </animateMotion>
-        </g>
-      </svg>
-      <div class="site-preview">
-        <div class="site-preview__chrome">
-          <div class="site-preview__controls"><span></span><span></span><span></span></div>
-          <div class="site-preview__address"><span></span>seunegocio.com.br</div>
-          <span class="site-preview__menu-icon"></span>
-        </div>
-
-        <div class="site-preview__page">
-          <div class="site-preview__navigation">
-            <span class="site-preview__wordmark">ER <b>WEB</b></span>
-            <div class="site-preview__navigation-links">
-              <span>Serviços</span><span>Sobre</span><span>Contato</span>
-            </div>
-            <span class="site-preview__navigation-action">Vamos conversar</span>
-          </div>
-
-          <div class="site-preview__content">
-            <div class="site-preview__text">
-              <span class="site-preview__eyebrow">O seu negócio, online</span>
-              <span class="site-preview__headline">Uma presença digital feita para você.</span>
-              <span class="site-preview__paragraph"></span>
-              <span class="site-preview__paragraph site-preview__paragraph--short"></span>
-              <span class="site-preview__button">Conheça os serviços <i></i></span>
-            </div>
-            <div class="site-preview__art">
-              <span class="site-preview__art-glow"></span>
-              <span class="site-preview__art-card site-preview__art-card--back"></span>
-              <span class="site-preview__art-card site-preview__art-card--front">
-                <i></i><i></i><i></i>
-              </span>
-            </div>
-          </div>
-
-          <div class="site-preview__footer">
-            <span>Apresentação clara</span><span>Contato facilitado</span>
-            <span>Visual responsivo</span>
-          </div>
-        </div>
+    <div class="hero__visual" appHeroVisual>
+      <div class="hero__glow-orbit" aria-hidden="true">
+        <span class="hero__glow-bloom"></span>
       </div>
 
-      <div class="hero__visual-caption">
-        <span class="hero__caption-dot"></span>
-        Prévia visual ilustrativa
+      <div class="hero__particles" aria-hidden="true">
+        <span class="hero__particle hero__particle--1"></span>
+        <span class="hero__particle hero__particle--2"></span>
+        <span class="hero__particle hero__particle--3"></span>
+        <span class="hero__particle hero__particle--4"></span>
+        <span class="hero__particle hero__particle--5"></span>
+        <span class="hero__particle hero__particle--6"></span>
+        <span class="hero__particle hero__particle--7"></span>
+        <span class="hero__particle hero__particle--8"></span>
       </div>
+
+      <figure class="hero__image-frame">
+        <img
+          class="hero__image"
+          ngSrc="/imagem-logo.png"
+          alt="Sites desenvolvidos pela ER Web: escritório de advocacia e consultoria de energia solar"
+          width="1200"
+          height="860"
+          priority
+          decoding="async"
+        />
+        <span class="hero__image-sheen" aria-hidden="true"></span>
+      </figure>
     </div>
   </div>
 </section>

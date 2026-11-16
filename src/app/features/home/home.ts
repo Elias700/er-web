@@ -1,10 +1,11 @@
+import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { WorkComponent } from '../work/work';
 import {
-  ParallaxDirective,
   SplitTextDirective,
   StaggerDirective,
 } from '../../shared/directives/reveal.directive';
+import { HeroVisualDirective } from './hero-visual.directive';
 import {
   AboutSectionComponent,
   ContactSectionComponent,
@@ -23,9 +24,10 @@ import {
   standalone: true,
   imports: [
     WorkComponent,
+    NgOptimizedImage,
     SplitTextDirective,
     StaggerDirective,
-    ParallaxDirective,
+    HeroVisualDirective,
     ServicesSectionComponent,
     ProcessSectionComponent,
     DifferentialsSectionComponent,
