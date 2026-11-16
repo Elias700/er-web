@@ -18,6 +18,8 @@ import {
 import { AUDIENCE } from './audience.data';
 import { INCLUDED } from './included.data';
 import { TESTIMONIALS } from './testimonials.data';
+import { VISIBLE_FAQ, formatPrice, type FaqSegment } from './faq.data';
+import { PROJECT_TYPES } from './contact.data';
 import { SITE_CONFIG, whatsappLink } from '../../core/config/site.config';
 import { ContactService } from '../../core/contact/contact.service';
 
@@ -326,7 +328,16 @@ export class TestimonialsSectionComponent {
       <header class="section-heading section-heading--left" appReveal>
         <p class="section-kicker">Dúvidas comuns</p>
         <h2 id="faq-title">Perguntas frequentes</h2>
-        <p>As respostas finais dependem do escopo combinado para cada projeto.</p>
+        <p class="faq-help">
+          Não encontrou sua dúvida?
+          @if (whatsapp) {
+            <a [href]="whatsapp" target="_blank" rel="noopener noreferrer"
+              >Fale comigo no WhatsApp</a
+            >
+          } @else {
+            <a href="#contato">Fale comigo</a>
+          }
+        </p>
       </header>
       <div class="faq-list">
         @for (item of questions; track item.question; let i = $index) {
@@ -351,41 +362,36 @@ export class TestimonialsSectionComponent {
               [attr.aria-labelledby]="'faq-trigger-' + i"
               [hidden]="openIndex() !== i"
             >
-              <p>{{ item.answer }}</p>
+              <p>
+                @for (part of item.answer; track $index) {
+                  @if (isText(part)) {
+                    <span>{{ part }}</span>
+                  } @else {
+                    <strong class="faq-highlight">{{ highlightText(part) }}</strong>
+                  }
+                }
+              </p>
             </div>
           </div>
         }
       </div>
     </div>
-    <!-- TODO: revisar respostas comerciais e operacionais -->
   </section>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FaqSectionComponent {
   readonly openIndex = signal(-1);
-  readonly questions = [
-    {
-      question: 'Qual é o prazo para criar um site?',
-      answer: 'O prazo é definido conforme o escopo, o conteúdo disponível e as etapas combinadas.',
-    },
-    {
-      question: 'Quanto custa um projeto?',
-      answer:
-        'O orçamento depende do tipo de projeto e dos recursos necessários. Envie os detalhes para solicitar uma avaliação.',
-    },
-    {
-      question: 'A hospedagem está incluída?',
-      answer: 'Hospedagem e domínio são alinhados durante a definição do projeto.',
-    },
-    {
-      question: 'É possível fazer manutenção depois?',
-      answer: 'A possibilidade e o formato de suporte podem ser combinados conforme a necessidade.',
-    },
-    {
-      question: 'Posso pedir alterações?',
-      answer: 'As revisões e ajustes previstos são definidos no escopo antes do início.',
-    },
-  ] as const;
+  /** Só as perguntas com resposta preenchida (as marcadas como null em faq.data.ts ficam ocultas). */
+  readonly questions = VISIBLE_FAQ;
+  protected readonly whatsapp = whatsappLink(
+    `Olá! Vim pelo site da ${SITE_CONFIG.companyName} e tenho uma dúvida.`,
+  );
+  protected isText(part: FaqSegment): part is string {
+    return typeof part === 'string';
+  }
+  protected highlightText(part: Exclude<FaqSegment, string>): string {
+    return 'price' in part ? formatPrice(part.price) : part.highlight;
+  }
   toggle(index: number): void {
     this.openIndex.update((current) => (current === index ? -1 : index));
   }
@@ -441,6 +447,7 @@ export class FinalCtaSectionComponent {}
           <input
             id="contact-name"
             formControlName="name"
+            placeholder="Seu nome completo"
             autocomplete="name"
             required
             [attr.aria-invalid]="showError('name')"
@@ -455,6 +462,7 @@ export class FinalCtaSectionComponent {}
           <input
             id="contact-email"
             formControlName="email"
+            placeholder="seuemail@exemplo.com"
             type="email"
             autocomplete="email"
             required
@@ -491,18 +499,29 @@ export class FinalCtaSectionComponent {}
         </div>
         <div class="form-field">
           <label for="contact-type">Tipo de projeto</label>
-          <select id="contact-type" formControlName="projectType">
-            <option value="">Selecione</option>
+          <select
+            id="contact-type"
+            formControlName="projectType"
+            required
+            [class.is-placeholder]="!form.controls.projectType.value"
+            [attr.aria-invalid]="showError('projectType')"
+            [attr.aria-describedby]="showError('projectType') ? 'contact-type-error' : null"
+          >
+            <option value="" disabled>Selecione o tipo de projeto</option>
             @for (type of projectTypes; track type) {
               <option [value]="type">{{ type }}</option>
             }
           </select>
+          @if (showError('projectType')) {
+            <small id="contact-type-error">Selecione o tipo de projeto.</small>
+          }
         </div>
         <div class="form-field form-field--full">
           <label for="contact-message">Mensagem</label>
           <textarea
             id="contact-message"
             formControlName="message"
+            placeholder="Conte um pouco sobre o seu negócio e o que você precisa…"
             rows="4"
             required
             [attr.aria-invalid]="showError('message')"
@@ -568,25 +587,20 @@ export class ContactSectionComponent {
   protected readonly whatsapp = whatsappLink();
   protected readonly email = SITE_CONFIG.email;
   protected readonly minMessageLength = 10;
-  protected readonly projectTypes = [
-    'Landing page',
-    'Site institucional',
-    'E-commerce',
-    'Sistema web',
-    'Manutenção',
-    'Outro',
-  ] as const;
+  protected readonly projectTypes = PROJECT_TYPES;
   protected readonly status = signal<'idle' | 'invalid' | 'sending' | 'success' | 'error'>('idle');
 
   readonly form = this.formBuilder.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email]],
     phone: ['', Validators.pattern(/^\(\d{2}\) \d{4,5}-\d{4}$/)],
-    projectType: [''],
+    projectType: ['', Validators.required],
     message: ['', [Validators.required, Validators.minLength(this.minMessageLength)]],
   });
 
-  protected showError(control: 'name' | 'email' | 'phone' | 'message'): boolean {
+  protected showError(
+    control: 'name' | 'email' | 'phone' | 'projectType' | 'message',
+  ): boolean {
     const field = this.form.controls[control];
     return field.invalid && field.touched;
   }
@@ -659,16 +673,23 @@ export class ContactSectionComponent {
                 [href]="social.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                [attr.aria-label]="social.label + ' (abre em nova aba)'"
+                [attr.aria-label]="social.label + ' da ' + companyName"
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                  @if (social.id === 'instagram') {
-                    <rect x="3" y="3" width="18" height="18" rx="5" />
-                    <circle cx="12" cy="12" r="4" />
-                    <circle class="footer-social__dot" cx="17.3" cy="6.7" r="1" />
-                  } @else {
-                    <rect x="3" y="3" width="18" height="18" rx="3" />
-                    <path d="M7.5 10.5v6M7.5 7.5v.01M11.5 16.5v-6M11.5 13c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5v3.5" />
+                  @switch (social.id) {
+                    @case ('instagram') {
+                      <rect x="3" y="3" width="18" height="18" rx="5" />
+                      <circle cx="12" cy="12" r="4" />
+                      <circle class="footer-social__dot" cx="17.3" cy="6.7" r="1" />
+                    }
+                    @case ('facebook') {
+                      <rect x="3" y="3" width="18" height="18" rx="5" />
+                      <path d="M15.5 7.5h-1.6c-1.6 0-2.4.9-2.4 2.5V21M9 13h6" />
+                    }
+                    @case ('linkedin') {
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <path d="M7.5 10.5v6M7.5 7.5v.01M11.5 16.5v-6M11.5 13c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5v3.5" />
+                    }
                   }
                 </svg>
               </a>
@@ -700,6 +721,7 @@ export class FooterSectionComponent {
   readonly socialLinks = (
     [
       { id: 'instagram', label: 'Instagram', url: SITE_CONFIG.social.instagram },
+      { id: 'facebook', label: 'Facebook', url: SITE_CONFIG.social.facebook },
       { id: 'linkedin', label: 'LinkedIn', url: SITE_CONFIG.social.linkedin },
     ] as const
   ).filter((social) => social.url);

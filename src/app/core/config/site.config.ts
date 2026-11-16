@@ -17,6 +17,7 @@ export interface SiteConfig {
   };
   readonly social: {
     readonly instagram: string;
+    readonly facebook: string;
     readonly linkedin: string;
   };
   /** Cidade/região atendida, usada nos dados estruturados. */
@@ -40,7 +41,8 @@ export const SITE_CONFIG: SiteConfig = {
   },
   social: {
     instagram: '', // TODO: link do perfil, ex.: 'https://instagram.com/erweb'
-    linkedin: '', // TODO: link do perfil, ex.: 'https://linkedin.com/in/seu-perfil'
+    facebook: '', // TODO: link da página, ex.: 'https://facebook.com/erweb'
+    linkedin: '', // opcional: 'https://linkedin.com/in/seu-perfil'
   },
   areaServed: 'Brasil', // TODO: confirmar região atendida
   showTestimonials: false,

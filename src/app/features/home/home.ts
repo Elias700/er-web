@@ -15,6 +15,8 @@ import { HeroVisualDirective } from './hero-visual.directive';
 import { WhyLandingComponent } from '../why-landing/why-landing';
 import { SITE_CONFIG } from '../../core/config/site.config';
 import { TESTIMONIALS } from '../sections/testimonials.data';
+import { faqJsonLd } from '../sections/faq.data';
+import { SeoService } from '../../core/seo/seo.service';
 import {
   AboutSectionComponent,
   AudienceSectionComponent,
@@ -64,6 +66,9 @@ export class HomeComponent {
     isPlatformBrowser(inject(PLATFORM_ID)) && window.location.hash.length > 1;
 
   constructor() {
+    // FAQPage no <head> desde o início (a seção do FAQ é adiada com @defer).
+    inject(SeoService).setStructuredData('ld-faq', faqJsonLd());
+
     if (!this.renderAll) return;
     const id = decodeURIComponent(window.location.hash.slice(1));
     afterNextRender(() => {

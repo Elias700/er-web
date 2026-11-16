@@ -50,7 +50,7 @@ export class SeoService {
   private setJsonLd(): void {
     const { companyName, ownerName, description, siteUrl, email, whatsapp, social, areaServed } =
       SITE_CONFIG;
-    const sameAs = [social.instagram, social.linkedin].filter(Boolean);
+    const sameAs = [social.instagram, social.facebook, social.linkedin].filter(Boolean);
     const data: Record<string, unknown> = {
       '@context': 'https://schema.org',
       '@type': 'ProfessionalService',
@@ -65,10 +65,15 @@ export class SeoService {
       ...(ownerName && { founder: { '@type': 'Person', name: ownerName } }),
     };
 
-    let script = this.document.getElementById('ld-professional-service');
+    this.setStructuredData('ld-professional-service', data);
+  }
+
+  /** Cria ou atualiza um bloco <script type="application/ld+json"> no <head>. */
+  setStructuredData(id: string, data: Record<string, unknown>): void {
+    let script = this.document.getElementById(id);
     if (!script) {
       script = this.document.createElement('script');
-      script.id = 'ld-professional-service';
+      script.id = id;
       script.setAttribute('type', 'application/ld+json');
       this.document.head.appendChild(script);
     }
