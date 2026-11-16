@@ -190,6 +190,133 @@ export class AnimationService {
     return () => context?.revert();
   }
 
+  animateHeroVisual(
+    host: HTMLElement,
+    image: HTMLImageElement,
+    sheen: HTMLElement,
+    glow: HTMLElement,
+  ): () => void {
+    const gsap = this.gsap;
+    if (!gsap || this.reducedMotion) return () => undefined;
+
+    let context: ReturnType<typeof gsap.context> | undefined;
+    let removeTilt = (): void => undefined;
+
+    this.zone.runOutsideAngular(() => {
+      context = gsap.context(() => {
+        gsap.set(image, { transformPerspective: 1100, transformOrigin: 'center center' });
+
+        const entrance = gsap.timeline();
+        entrance.fromTo(
+          image,
+          { x: 52, y: 34, rotateY: -18, rotateX: 8, scale: 0.9, autoAlpha: 0 },
+          {
+            x: 0,
+            y: 0,
+            rotateY: 0,
+            rotateX: 0,
+            scale: 1,
+            autoAlpha: 1,
+            duration: 1.2,
+            delay: 0.3,
+            ease: 'expo.out',
+          },
+        );
+        entrance.fromTo(
+          sheen,
+          { xPercent: -140, autoAlpha: 0 },
+          {
+            xPercent: 140,
+            autoAlpha: 0.75,
+            duration: 0.9,
+            ease: 'power2.inOut',
+            onComplete: () => {
+              gsap.set(sheen, { autoAlpha: 0 });
+              sheen.style.willChange = 'auto';
+            },
+          },
+          '+=0.1',
+        );
+
+        gsap.to(image, {
+          y: -8,
+          duration: 3,
+          delay: 1.5,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+        });
+
+        const canTilt = window.matchMedia(
+          '(min-width: 768px) and (hover: hover) and (pointer: fine)',
+        ).matches;
+        if (!canTilt) return;
+
+        let currentX = 0;
+        let currentY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        let tickerActive = false;
+
+        const updateTilt = (): void => {
+          currentX += (targetX - currentX) * 0.1;
+          currentY += (targetY - currentY) * 0.1;
+          gsap.set(image, { rotateX: currentX, rotateY: currentY });
+          gsap.set(glow, { x: -currentY * 1.5, y: currentX * 1.5 });
+
+          const settled = Math.abs(targetX - currentX) + Math.abs(targetY - currentY) < 0.02;
+          if (settled) {
+            currentX = targetX;
+            currentY = targetY;
+            if (targetX === 0 && targetY === 0) {
+              gsap.ticker.remove(updateTilt);
+              tickerActive = false;
+            }
+          }
+        };
+
+        const startTilt = (): void => {
+          if (tickerActive) return;
+          gsap.ticker.add(updateTilt);
+          tickerActive = true;
+        };
+
+        const onPointerMove = (event: PointerEvent): void => {
+          if (event.pointerType !== 'mouse') return;
+          const bounds = host.getBoundingClientRect();
+          const horizontal = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+          const vertical = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+          targetX = (0.5 - vertical) * 12;
+          targetY = (horizontal - 0.5) * 12;
+          startTilt();
+        };
+
+        const onPointerLeave = (): void => {
+          targetX = 0;
+          targetY = 0;
+          startTilt();
+        };
+
+        const enableTilt = (): void => {
+          host.addEventListener('pointermove', onPointerMove, { passive: true });
+          host.addEventListener('pointerleave', onPointerLeave);
+        };
+        entrance.eventCallback('onComplete', enableTilt);
+
+        removeTilt = (): void => {
+          host.removeEventListener('pointermove', onPointerMove);
+          host.removeEventListener('pointerleave', onPointerLeave);
+          gsap.ticker.remove(updateTilt);
+        };
+      }, host);
+    });
+
+    return () => {
+      removeTilt();
+      context?.revert();
+    };
+  }
+
   counter(element: HTMLElement, target: number, duration = 1.2): () => void {
     const gsap = this.gsap;
     const scrollTrigger = this.scrollTrigger;
