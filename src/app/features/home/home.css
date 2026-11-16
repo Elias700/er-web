@@ -1,4 +1,4 @@
-:host {
+app-home {
   display: block;
 }
 
@@ -129,13 +129,26 @@
   padding: 0.85rem 1.15rem;
   background: var(--color-brand-primary);
   color: var(--color-brand-ink);
-  cursor: not-allowed;
+  cursor: pointer;
   font: inherit;
   font-size: 0.94rem;
   font-weight: 700;
   line-height: 1.35;
   text-align: left;
-  opacity: 0.74;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.hero__quote-button:hover {
+  background: var(--color-brand-hover);
+  transform: translateY(-2px);
+}
+
+.hero__quote-button:focus-visible {
+  outline: 3px solid var(--color-brand-soft);
+  outline-offset: 4px;
 }
 
 .hero__quote-button svg {
@@ -146,14 +159,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.6;
-}
-
-.hero__status {
-  max-width: 30rem;
-  margin: 0.85rem 0 0;
-  color: var(--color-brand-muted);
-  font-size: 0.78rem;
-  line-height: 1.55;
 }
 
 .hero__visual {
@@ -261,9 +266,7 @@
 .site-preview__page {
   min-height: 18rem;
   padding: clamp(0.8rem, 3.5vw, 1.55rem);
-  background:
-    radial-gradient(ellipse at 82% 50%, rgb(16 185 129 / 13%), transparent 42%),
-    #f8fafc;
+  background: radial-gradient(ellipse at 82% 50%, rgb(16 185 129 / 13%), transparent 42%), #f8fafc;
   color: var(--color-brand-ink);
 }
 
@@ -519,4 +522,3 @@
     transform: perspective(1000px) rotateY(-5deg) rotateX(1deg);
   }
 }
-

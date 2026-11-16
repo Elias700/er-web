@@ -10,7 +10,12 @@
   background: rgb(7 23 19 / 88%);
   transition:
     background-color 300ms ease,
-    border-color 300ms ease;
+    border-color 300ms ease,
+    transform 250ms ease;
+}
+
+.header-shell--hidden {
+  transform: translateY(-100%);
 }
 
 .header-shell--scrolled {

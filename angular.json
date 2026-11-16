@@ -26,7 +26,10 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.css",
+              "src/app/features/sections/sections.css",
+              "src/app/features/home/home.css",
+              "src/app/features/work/work.css"
             ]
           },
           "configurations": {

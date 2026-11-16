@@ -1,65 +1,25 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
+import { projects, type ProjectData } from './projects.data';
+import { RevealDirective, StaggerDirective } from '../../shared/directives/reveal.directive';
 
-interface WorkProject {
-  readonly id: string;
-  readonly name: string;
-  readonly category: string;
-  readonly description: string;
-  readonly tags: readonly string[];
-  readonly websiteUrl: string;
+interface WorkProject extends ProjectData {
   readonly previewUrl: SafeResourceUrl;
-  readonly thumbnailUrl: string;
-  readonly thumbnailAlt: string;
-  readonly isDemo: boolean;
 }
-
-const projectsData = [
-  {
-    id: 'robert-solar',
-    name: 'Robert Solar',
-    category: 'Landing page',
-    description:
-      'Página para apresentar serviços de consultoria em energia solar e facilitar o contato pelo WhatsApp.',
-    tags: ['Responsivo', 'WhatsApp', 'Página única'],
-    websiteUrl: 'https://robertsolar.com.br/',
-    thumbnailUrl: '/assets/work/robert-solar.webp',
-    thumbnailAlt: 'Apresentação ilustrativa do projeto Robert Solar',
-    isDemo: false
-  },
-  {
-    id: 'modelo-advocacia',
-    name: 'Modelo de Advocacia',
-    category: 'Site demonstrativo',
-    description:
-      'Modelo de site para apresentar um escritório de advocacia, suas áreas de atuação e seus canais de contato.',
-    tags: ['Projeto demonstrativo'],
-    websiteUrl: 'https://modelo-advocacia-ecru.vercel.app/',
-    thumbnailUrl: '/assets/work/modelo-advocacia.webp',
-    thumbnailAlt: 'Apresentação ilustrativa do projeto Modelo de Advocacia',
-    isDemo: true
-  }
-] as const;
 
 @Component({
   selector: 'app-work',
   standalone: true,
+  imports: [RevealDirective, StaggerDirective],
   templateUrl: './work.html',
-  styleUrl: './work.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkComponent {
   private readonly sanitizer = inject(DomSanitizer);
 
-  protected readonly projects: readonly WorkProject[] = projectsData.map((project) => ({
+  protected readonly projects: readonly WorkProject[] = projects.map((project) => ({
     ...project,
-    previewUrl: this.sanitizer.bypassSecurityTrustResourceUrl(project.websiteUrl)
+    previewUrl: this.sanitizer.bypassSecurityTrustResourceUrl(project.websiteUrl),
   }));
 
   protected readonly activeIndex = signal(0);
@@ -67,7 +27,8 @@ export class WorkComponent {
   protected readonly isTransitioning = signal(false);
   protected readonly currentProject = computed(() => this.projects[this.activeIndex()]);
   protected readonly positionLabel = computed(
-    () => `${String(this.activeIndex() + 1).padStart(2, '0')} / ${String(this.projects.length).padStart(2, '0')}`
+    () =>
+      `${String(this.activeIndex() + 1).padStart(2, '0')} / ${String(this.projects.length).padStart(2, '0')}`,
   );
 
   private frameTimer: ReturnType<typeof setTimeout> | undefined;

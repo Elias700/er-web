@@ -2,6 +2,7 @@
   tabindex="-1"
   class="header-shell"
   [class.header-shell--scrolled]="isScrolled()"
+  [class.header-shell--hidden]="hiddenOnScroll()"
 >
   <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
     <a
@@ -11,9 +12,7 @@
       aria-label="ER Web — início"
       (click)="onNavigationClick()"
     >
-      <span class="brand-mark" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </span>
+      <span class="brand-mark" aria-hidden="true"> <span></span><span></span><span></span> </span>
       <span class="font-display text-sm font-semibold tracking-[0.12em] text-white sm:text-base">
         ER Web
       </span>

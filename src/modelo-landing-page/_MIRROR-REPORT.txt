@@ -1,0 +1,18 @@
+VibeCloner — Relatório de Mirror
+==================================
+URL: https://white-desert.com/camps/echo-base
+Capturado em: 2026-11-15T19:49:38.882Z
+
+Recursos detectados na página: 402
+Assets estáticos tentados: 361
+Baixados para o mirror: 360
+Falharam: 1
+
+FALHAS (URL — tipo — erro):
+---------------------------
+[img] HTTP 405
+    https://ad.doubleclick.net/ccm/s/collect?auid=1964990313.1794485286&gtm=45He6bb1v9237221384za200zd9237221384xeaxf1&fmt=3
+
+Obs.: recursos que falharam mantêm a URL original no HTML (carregam
+da web quando o clone é servido com internet). Envie este arquivo
+para diagnóstico se algo estiver faltando.

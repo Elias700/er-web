@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
+  --color-brand-text: #0f172a;
   --color-brand-ink: #071713;
   --color-brand-surface: #0b1f1a;
   --color-brand-primary: #10b981;
@@ -20,7 +21,7 @@ html {
   scroll-margin-top: 5.5rem;
 }
 
-html:focus-within {
+html {
   scroll-behavior: smooth;
 }
 
@@ -30,6 +31,16 @@ body {
   background: var(--color-brand-ink);
   color: var(--color-white);
   font-family: var(--font-interface);
+}
+
+body {
+  color: var(--color-brand-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -317,11 +328,15 @@ body {
 @keyframes home-marker-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(16 185 129 / 0%), 0 0 1rem rgb(16 185 129 / 55%);
+    box-shadow:
+      0 0 0 0 rgb(16 185 129 / 0%),
+      0 0 1rem rgb(16 185 129 / 55%);
   }
 
   50% {
-    box-shadow: 0 0 0 0.35rem rgb(16 185 129 / 12%), 0 0 1.2rem rgb(16 185 129 / 75%);
+    box-shadow:
+      0 0 0 0.35rem rgb(16 185 129 / 12%),
+      0 0 1.2rem rgb(16 185 129 / 75%);
   }
 }
 

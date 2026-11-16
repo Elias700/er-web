@@ -1,6 +1,6 @@
 <section class="work-section" id="trabalhos" aria-labelledby="work-title">
   <div class="work-section__inner">
-    <header class="work-section__intro">
+    <header class="work-section__intro" appReveal>
       <div class="work-section__eyebrow" aria-label="Portfólio">
         <span aria-hidden="true"></span>
         <p>Portfólio</p>
@@ -41,6 +41,7 @@
       @if (currentProject(); as project) {
         <article
           class="work-project"
+          appReveal
           [class.work-project--transitioning]="isTransitioning()"
         >
           <p class="work-project__category">{{ project.category }}</p>
@@ -84,14 +85,19 @@
         </svg>
       </button>
 
-      <div class="work-gallery__track">
+      <div class="work-gallery__track" appStagger=".work-thumbnail">
         @for (project of projects; track project.id; let index = $index) {
           <button
             class="work-thumbnail"
             [class.work-thumbnail--active]="isActive(index)"
             type="button"
             [attr.aria-pressed]="isActive(index)"
-            [attr.aria-label]="project.name + ', ' + project.category + (project.isDemo ? ', projeto demonstrativo' : '')"
+            [attr.aria-label]="
+              project.name +
+              ', ' +
+              project.category +
+              (project.isDemo ? ', projeto demonstrativo' : '')
+            "
             (click)="selectProject(index)"
           >
             <span

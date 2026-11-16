@@ -1,0 +1,1 @@
+.sticky-split_slider{z-index:2;position:relative}.sticky-split_grid.is-reversed>.sticky-col,.sticky-split_grid.is-reversed>.sticky-col_scrub{grid-row:1}@media (max-width:767px){.sticky-col,.sticky-col_scrub{width:100%;grid-column:1/-1!important}.sticky-split_slider .sticky-split_grid.u-grid.no-gap{row-gap:var(--size-5);flex-direction:column-reverse;display:flex}}

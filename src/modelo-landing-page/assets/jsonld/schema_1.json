@@ -1,0 +1,54 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://white-desert.com/#organization",
+      "name": "White Desert",
+      "url": "https://white-desert.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://imagedelivery.net/p_-2dRRbgzr8qPFwN5vrAw/01b46bfe-e732-4a19-e567-06e060135700/public"
+      },
+      "description": "White Desert is the world’s leading luxury Antarctic expedition company, offering once-in-a-lifetime experiences to the South Pole, Emperor Penguin colonies, and remote ice camps.",
+      "foundingDate": "2005",
+      "sameAs": [
+        "https://www.instagram.com/white.desert.antarctica/",
+        "https://www.facebook.com/white.desert.antarctica/",
+        "https://www.linkedin.com/company/white-desert/",
+        "https://www.youtube.com/@white.desert.antarctica"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://white-desert.com/#website",
+      "url": "https://white-desert.com/",
+      "name": "White Desert",
+      "publisher": {
+        "@id": "https://white-desert.com/#organization"
+      },
+      "inLanguage": "en-GB"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://white-desert.com/#webpage",
+      "url": "https://white-desert.com/",
+      "name": "Luxury Antarctic Expeditions | White Desert",
+      "description": "Experience the ultimate luxury adventure to Antarctica with White Desert. Fly to the South Pole, meet Emperor Penguins, and stay in the most exclusive polar camps on Earth.",
+      "isPartOf": {
+        "@id": "https://white-desert.com/#website"
+      },
+      "about": {
+        "@id": "https://white-desert.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://white-desert.com/#organization"
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://cdn.sanity.io/images/kq9qn5zn/production/61d6822b0a9de3ba0d497135328c37d64f981c0d-2000x1333.jpg"
+      },
+      "inLanguage": "en-GB"
+    }
+  ]
+}
