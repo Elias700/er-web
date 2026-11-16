@@ -60,6 +60,11 @@ app-site-footer {
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
+/* Verde mais escuro em fundos claros: #10b981 dá só 2,4:1 sobre #f8fafc */
+.section-light .section-kicker,
+.audience-section .section-kicker {
+  color: #047857;
+}
 .section-heading--light .section-kicker,
 .about-copy .section-kicker,
 .final-cta .section-kicker {
@@ -455,24 +460,33 @@ app-site-footer {
 .faq-item {
   border-bottom: 1px solid #cbd5e1;
 }
-.faq-item summary {
+.faq-question {
+  margin: 0;
+}
+.faq-trigger {
   display: flex;
+  width: 100%;
   min-height: 4rem;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  padding: 0.75rem 0;
+  border: 0;
+  background: none;
+  color: inherit;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
-  list-style: none;
+  text-align: left;
 }
-.faq-item summary::-webkit-details-marker {
-  display: none;
-}
-.faq-item summary span {
+.faq-trigger span {
+  flex: none;
   color: #047857;
   font-size: 1.5rem;
+}
+.faq-trigger:hover {
+  color: #047857;
 }
 .faq-item p {
   max-width: 42rem;
@@ -519,7 +533,7 @@ app-site-footer {
   opacity: 0.72;
 }
 .button-primary:focus-visible,
-.faq-item summary:focus-visible,
+.faq-trigger:focus-visible,
 .site-footer a:focus-visible {
   outline: 3px solid #34d399;
   outline-offset: 4px;

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { projects, type ProjectData } from './projects.data';
 import { RevealDirective, StaggerDirective } from '../../shared/directives/reveal.directive';
@@ -16,6 +25,8 @@ interface WorkProject extends ProjectData {
 })
 export class WorkComponent {
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
+  private readonly injector = inject(Injector);
 
   protected readonly projects: readonly WorkProject[] = projects.map((project) => ({
     ...project,
@@ -56,6 +67,17 @@ export class WorkComponent {
 
   protected nextProject(): void {
     this.selectProject((this.activeIndex() + 1) % this.projects.length);
+  }
+
+  /** Mantém o foco no projeto ativo ao navegar pelo teclado com as setas. */
+  protected focusActiveThumbnail(): void {
+    afterNextRender(
+      () =>
+        this.host.nativeElement
+          .querySelector<HTMLButtonElement>('.work-thumbnail--active')
+          ?.focus(),
+      { injector: this.injector },
+    );
   }
 
   protected onFrameLoad(): void {

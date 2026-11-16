@@ -30,7 +30,7 @@ export class HeaderComponent {
   protected readonly hiddenOnScroll = signal(false);
   protected readonly activeNavigation = signal('home');
   protected readonly navigationItems: readonly RubberSegmentItem[] = [
-    { value: 'home', label: 'Home', href: '#home' },
+    { value: 'home', label: 'Início', href: '#home' },
     { value: 'servicos', label: 'Serviços', href: '#servicos' },
     { value: 'trabalhos', label: 'Projetos', href: '#trabalhos' },
     { value: 'processo', label: 'Processo', href: '#processo' },

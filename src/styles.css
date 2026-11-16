@@ -464,3 +464,32 @@ body {
     opacity: 0.14;
   }
 }
+
+/* Acessibilidade: link para pular a navegação */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--color-brand-primary);
+  color: #052e23;
+  font-weight: 700;
+  text-decoration: none;
+  translate: 0 -200%;
+}
+.skip-link:focus {
+  translate: 0 0;
+  outline: 3px solid var(--color-white);
+  outline-offset: 2px;
+}
+#main-content:focus {
+  outline: none;
+}
+
+/* Foco visível padrão para qualquer link ou controle sem estilo próprio */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid #34d399;
+  outline-offset: 3px;
+}

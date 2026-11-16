@@ -75,7 +75,12 @@
       }
     </div>
 
-    <nav class="work-gallery" aria-label="Projetos do portfólio">
+    <nav
+      class="work-gallery"
+      aria-label="Projetos do portfólio"
+      (keydown.arrowleft)="previousProject(); focusActiveThumbnail()"
+      (keydown.arrowright)="nextProject(); focusActiveThumbnail()"
+    >
       <button
         class="work-gallery__arrow"
         type="button"

@@ -330,12 +330,30 @@ export class TestimonialsSectionComponent {
       </header>
       <div class="faq-list">
         @for (item of questions; track item.question; let i = $index) {
-          <details class="faq-item" [open]="openIndex() === i" (toggle)="onToggle(i, $event)">
-            <summary>
-              {{ item.question }}<span aria-hidden="true">{{ openIndex() === i ? '−' : '+' }}</span>
-            </summary>
-            <p>{{ item.answer }}</p>
-          </details>
+          <div class="faq-item">
+            <h3 class="faq-question">
+              <button
+                type="button"
+                class="faq-trigger"
+                [id]="'faq-trigger-' + i"
+                [attr.aria-expanded]="openIndex() === i"
+                [attr.aria-controls]="'faq-panel-' + i"
+                (click)="toggle(i)"
+              >
+                {{ item.question }}
+                <span aria-hidden="true">{{ openIndex() === i ? '−' : '+' }}</span>
+              </button>
+            </h3>
+            <div
+              class="faq-panel"
+              role="region"
+              [id]="'faq-panel-' + i"
+              [attr.aria-labelledby]="'faq-trigger-' + i"
+              [hidden]="openIndex() !== i"
+            >
+              <p>{{ item.answer }}</p>
+            </div>
+          </div>
         }
       </div>
     </div>
@@ -368,9 +386,8 @@ export class FaqSectionComponent {
       answer: 'As revisões e ajustes previstos são definidos no escopo antes do início.',
     },
   ] as const;
-  onToggle(index: number, event: Event): void {
-    if ((event.currentTarget as HTMLDetailsElement).open) this.openIndex.set(index);
-    else if (this.openIndex() === index) this.openIndex.set(-1);
+  toggle(index: number): void {
+    this.openIndex.update((current) => (current === index ? -1 : index));
   }
 }
 
