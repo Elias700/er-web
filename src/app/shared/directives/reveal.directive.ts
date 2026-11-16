@@ -68,7 +68,10 @@ export class StaggerDirective implements OnDestroy {
       () => {
         void this.animations.ready.then(() => {
           if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.stagger(this.element.nativeElement, this.appStagger);
+            this.cleanup = this.animations.stagger(
+              this.element.nativeElement,
+              this.appStagger || '[data-stagger-item]',
+            );
         });
       },
       { injector: this.injector },
@@ -119,7 +122,10 @@ export class SplitTextDirective implements OnDestroy {
       () => {
         void this.animations.ready.then(() => {
           if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.splitText(this.element.nativeElement, this.appSplitText);
+            this.cleanup = this.animations.splitText(
+              this.element.nativeElement,
+              this.appSplitText || '[data-split-word]',
+            );
         });
       },
       { injector: this.injector },
@@ -172,6 +178,36 @@ export class ScrollProgressDirective implements OnDestroy {
         void this.animations.ready.then(() => {
           if (!this.destroyRef.destroyed)
             this.cleanup = this.animations.progress(this.element.nativeElement);
+        });
+      },
+      { injector: this.injector },
+    );
+  }
+  ngOnDestroy(): void {
+    this.cleanup?.();
+  }
+}
+
+/** Escreve o progresso do scroll em `--scroll-progress` (0 → 1) no elemento. */
+@Directive({ selector: '[appScrollVariable]', standalone: true })
+export class ScrollVariableDirective implements OnDestroy {
+  @Input() scrollStart = 'top 75%';
+  @Input() scrollEnd = 'bottom 55%';
+  private readonly element = inject(ElementRef<HTMLElement>);
+  private readonly animations = inject(AnimationService);
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private cleanup?: () => void;
+  constructor() {
+    afterNextRender(
+      () => {
+        void this.animations.ready.then(() => {
+          if (!this.destroyRef.destroyed)
+            this.cleanup = this.animations.scrollVariable(
+              this.element.nativeElement,
+              this.scrollStart,
+              this.scrollEnd,
+            );
         });
       },
       { injector: this.injector },

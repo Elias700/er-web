@@ -1,0 +1,151 @@
+<section
+  class="content-section section-light why-section"
+  id="por-que"
+  aria-labelledby="why-title"
+>
+  <div class="section-wrap">
+    <header class="section-heading" appReveal>
+      <p class="section-kicker">{{ content.kicker }}</p>
+      <h2 id="why-title">{{ content.title }}</h2>
+      <p>{{ content.subtitle }}</p>
+    </header>
+
+    <!-- Bloco 1: gráfico ilustrativo -->
+    <div class="why-chart" appReveal>
+      <div class="why-chart__copy">
+        <h3>{{ content.chart.title }}</h3>
+        <p>{{ content.chart.description }}</p>
+        <ul class="why-chart__legend" aria-hidden="true">
+          <li class="why-chart__legend-item why-chart__legend-item--page">
+            {{ content.chart.pageLabel }}
+          </li>
+          <li class="why-chart__legend-item why-chart__legend-item--social">
+            {{ content.chart.socialLabel }}
+          </li>
+        </ul>
+      </div>
+      <figure class="why-chart__figure" appScrollVariable scrollStart="top 80%" scrollEnd="bottom 45%">
+        <span class="why-chart__tag">{{ content.chart.label }}</span>
+        <svg
+          class="why-chart__svg"
+          viewBox="0 0 600 320"
+          preserveAspectRatio="xMidYMid meet"
+          role="img"
+          [attr.aria-label]="content.chart.ariaLabel"
+        >
+          <g class="why-chart__grid" aria-hidden="true">
+            <line x1="48" y1="70" x2="580" y2="70" />
+            <line x1="48" y1="140" x2="580" y2="140" />
+            <line x1="48" y1="210" x2="580" y2="210" />
+          </g>
+          <g class="why-chart__axes" aria-hidden="true">
+            <line x1="48" y1="24" x2="48" y2="280" />
+            <line x1="48" y1="280" x2="580" y2="280" />
+            <text x="580" y="306" text-anchor="end">{{ content.chart.xAxis }} →</text>
+            <text x="20" y="152" text-anchor="middle" transform="rotate(-90 20 152)">
+              {{ content.chart.yAxis }} →
+            </text>
+          </g>
+          <path
+            class="why-chart__line why-chart__line--social"
+            pathLength="1"
+            d="M48 252 C 170 246, 290 240, 400 236 S 520 230, 576 226"
+          />
+          <path
+            class="why-chart__line why-chart__line--page"
+            pathLength="1"
+            d="M48 252 C 150 244, 230 214, 320 168 S 480 70, 576 50"
+          />
+          <circle class="why-chart__dot why-chart__dot--social" cx="576" cy="226" r="6" />
+          <circle class="why-chart__dot why-chart__dot--page" cx="576" cy="50" r="7" />
+        </svg>
+      </figure>
+    </div>
+
+    <!-- Bloco 2: jornada do cliente -->
+    <div class="why-journey">
+      <header class="why-block-heading" appReveal>
+        <h3>{{ content.journey.title }}</h3>
+        <p>{{ content.journey.description }}</p>
+      </header>
+      <div class="why-journey__track" appScrollVariable scrollStart="top 75%" scrollEnd="bottom 60%">
+        <span class="why-journey__line" aria-hidden="true"
+          ><span class="why-journey__line-fill"></span
+        ></span>
+        <ol class="why-journey__steps">
+          @for (step of content.journey.steps; track step.id; let i = $index; let count = $count) {
+            <li class="why-journey__step" [style.--step-at]="i / (count - 1)">
+              <span class="why-journey__icon" aria-hidden="true">
+                @switch (step.id) {
+                  @case ('instagram') {
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle class="why-icon-fill" cx="17.3" cy="6.7" r="1" /></svg>
+                  }
+                  @case ('page') {
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5" /><path d="M3 8.5h18M7 13h6M7 16.5h10" /></svg>
+                  }
+                  @case ('whatsapp') {
+                    <svg viewBox="0 0 24 24"><path d="M4.5 19.5 5.6 16A8 8 0 1 1 8.4 18.6Z" /><path d="M9.2 9.4c.3 2.3 2.1 4.2 4.5 4.7l1-1 1.6.8" /></svg>
+                  }
+                  @case ('client') {
+                    <svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.6" /><path d="M3.5 19.5a6.5 6.5 0 0 1 11.2-4.5M15 18l2 2 4-4.5" /></svg>
+                  }
+                }
+              </span>
+              <span class="why-journey__number" aria-hidden="true">0{{ i + 1 }}</span>
+              <h4>{{ step.title }}</h4>
+              <p>{{ step.description }}</p>
+            </li>
+          }
+        </ol>
+      </div>
+    </div>
+
+    <!-- Bloco 3: dados com fonte -->
+    <div class="why-stats">
+      <header class="why-block-heading" appReveal>
+        <h3>{{ content.stats.title }}</h3>
+      </header>
+      <ul class="why-stats__grid" appStagger>
+        @for (stat of content.stats.items; track stat.text) {
+          <li class="why-stat" data-stagger-item>
+            <p class="why-stat__value">
+              <span [appCounter]="stat.value">{{ stat.value }}</span>{{ stat.suffix }}
+            </p>
+            <p class="why-stat__text">{{ stat.text }}</p>
+            <p class="why-stat__source">{{ stat.source }}</p>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <!-- Bloco 4: comparativo -->
+    <div class="why-compare" appStagger>
+      @for (card of content.comparison; track card.tone) {
+        <article
+          class="why-compare__card"
+          [class.why-compare__card--with]="card.tone === 'with'"
+          [class.why-compare__card--without]="card.tone === 'without'"
+          data-stagger-item
+        >
+          <h3>
+            <span class="why-compare__badge" aria-hidden="true">{{
+              card.tone === 'with' ? '✓' : '✕'
+            }}</span>
+            {{ card.title }}
+          </h3>
+          <ul>
+            @for (item of card.items; track item) {
+              <li>{{ item }}</li>
+            }
+          </ul>
+        </article>
+      }
+    </div>
+
+    <div class="why-cta" appReveal>
+      <a class="button-primary" appMagnetic href="#contato"
+        >{{ content.cta }} <span aria-hidden="true">↗</span></a
+      >
+    </div>
+  </div>
+</section>

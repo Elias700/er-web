@@ -322,6 +322,9 @@ export class AnimationService {
     const scrollTrigger = this.scrollTrigger;
     if (!gsap || !scrollTrigger || this.reducedMotion) return () => undefined;
     let context: ReturnType<typeof gsap.context> | undefined;
+    // O HTML já traz o valor final (visível sem JS ou com movimento reduzido);
+    // só zera quando a animação realmente vai acontecer.
+    element.textContent = '0';
     this.zone.runOutsideAngular(() => {
       context = gsap.context(() => {
         const value = { current: 0 };
@@ -336,7 +339,39 @@ export class AnimationService {
         });
       }, element);
     });
-    return () => context?.revert();
+    return () => {
+      context?.revert();
+      element.textContent = String(target);
+    };
+  }
+
+  /**
+   * Publica o progresso do scroll (0 → 1) na variável CSS `--scroll-progress`
+   * do elemento. O CSS decide o que fazer com ela (desenhar linhas, preencher
+   * barras, acender etapas). Sem animação, a variável fica no valor padrão do CSS (1).
+   */
+  scrollVariable(element: HTMLElement, start = 'top 75%', end = 'bottom 55%'): () => void {
+    const gsap = this.gsap;
+    const scrollTrigger = this.scrollTrigger;
+    if (!gsap || !scrollTrigger || this.reducedMotion) return () => undefined;
+    let trigger: ScrollTriggerType | undefined;
+    const proxy = { value: 0 };
+    let tween: ReturnType<typeof gsap.to> | undefined;
+    this.zone.runOutsideAngular(() => {
+      element.style.setProperty('--scroll-progress', '0');
+      tween = gsap.to(proxy, {
+        value: 1,
+        ease: 'none',
+        onUpdate: () => element.style.setProperty('--scroll-progress', proxy.value.toFixed(4)),
+        scrollTrigger: { trigger: element, start, end, scrub: 0.6 },
+      });
+      trigger = tween.scrollTrigger;
+    });
+    return () => {
+      trigger?.kill();
+      tween?.kill();
+      element.style.removeProperty('--scroll-progress');
+    };
   }
 
   progress(element: HTMLElement): () => void {

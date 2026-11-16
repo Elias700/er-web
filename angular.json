@@ -29,7 +29,8 @@
               "src/styles.css",
               "src/app/features/sections/sections.css",
               "src/app/features/home/home.css",
-              "src/app/features/work/work.css"
+              "src/app/features/work/work.css",
+              "src/app/features/why-landing/why-landing.css"
             ]
           },
           "configurations": {

@@ -6,6 +6,7 @@ import {
   StaggerDirective,
 } from '../../shared/directives/reveal.directive';
 import { HeroVisualDirective } from './hero-visual.directive';
+import { WhyLandingComponent } from '../why-landing/why-landing';
 import {
   AboutSectionComponent,
   ContactSectionComponent,
@@ -26,6 +27,7 @@ import {
     SplitTextDirective,
     StaggerDirective,
     HeroVisualDirective,
+    WhyLandingComponent,
     ServicesSectionComponent,
     ProcessSectionComponent,
     AboutSectionComponent,
