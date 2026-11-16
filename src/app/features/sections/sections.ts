@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   MagneticDirective,
@@ -10,7 +18,8 @@ import {
 import { AUDIENCE } from './audience.data';
 import { INCLUDED } from './included.data';
 import { TESTIMONIALS } from './testimonials.data';
-import { SITE_CONFIG } from '../../core/config/site.config';
+import { SITE_CONFIG, whatsappLink } from '../../core/config/site.config';
+import { ContactService } from '../../core/contact/contact.service';
 
 @Component({
   selector: 'app-services',
@@ -395,73 +404,220 @@ export class FinalCtaSectionComponent {}
       <header class="section-heading section-heading--left section-heading--light" appReveal>
         <p class="section-kicker">Contato</p>
         <h2 id="contact-title">Vamos falar do seu projeto</h2>
-        <p>As informações serão usadas para entender o pedido e responder ao contato.</p>
-        <p class="contact-channel">WhatsApp da empresa: <strong>A configurar</strong></p>
-        <button class="button-primary whatsapp-placeholder" type="button" disabled>
-          WhatsApp a configurar</button
-        ><!-- TODO: configurar número de WhatsApp -->
+        <p>Conte o que você precisa. Eu respondo com os próximos passos e uma proposta.</p>
+        @if (whatsapp || email) {
+          <div class="contact-channels">
+            @if (whatsapp) {
+              <a class="button-primary" [href]="whatsapp" target="_blank" rel="noopener noreferrer"
+                >Chamar no WhatsApp <span aria-hidden="true">↗</span></a
+              >
+            }
+            @if (email) {
+              <a class="contact-email" [href]="'mailto:' + email">{{ email }}</a>
+            }
+          </div>
+        }
       </header>
       <form class="contact-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <label>Nome<input formControlName="name" autocomplete="name" required /></label>
-        @if (form.controls.name.touched && form.controls.name.invalid) {
-          <small>Informe seu nome.</small>
-        }
-        <label
-          >E-mail<input formControlName="email" type="email" autocomplete="email" required
-        /></label>
-        @if (form.controls.email.touched && form.controls.email.invalid) {
-          <small>Informe um e-mail válido.</small>
-        }
-        <label>WhatsApp<input formControlName="phone" type="tel" autocomplete="tel" /></label>
-        <label
-          >Tipo de projeto<select formControlName="projectType">
+        <div class="form-field">
+          <label for="contact-name">Nome</label>
+          <input
+            id="contact-name"
+            formControlName="name"
+            autocomplete="name"
+            required
+            [attr.aria-invalid]="showError('name')"
+            [attr.aria-describedby]="showError('name') ? 'contact-name-error' : null"
+          />
+          @if (showError('name')) {
+            <small id="contact-name-error">Informe seu nome.</small>
+          }
+        </div>
+        <div class="form-field">
+          <label for="contact-email">E-mail</label>
+          <input
+            id="contact-email"
+            formControlName="email"
+            type="email"
+            autocomplete="email"
+            required
+            [attr.aria-invalid]="showError('email')"
+            [attr.aria-describedby]="showError('email') ? 'contact-email-error' : null"
+          />
+          @if (showError('email')) {
+            <small id="contact-email-error">
+              {{
+                form.controls.email.hasError('required')
+                  ? 'Informe seu e-mail.'
+                  : 'Confira o e-mail. Exemplo: nome@email.com'
+              }}
+            </small>
+          }
+        </div>
+        <div class="form-field">
+          <label for="contact-phone">WhatsApp <span class="form-optional">(opcional)</span></label>
+          <input
+            id="contact-phone"
+            formControlName="phone"
+            type="tel"
+            inputmode="numeric"
+            autocomplete="tel-national"
+            placeholder="(00) 00000-0000"
+            maxlength="15"
+            (input)="maskPhone()"
+            [attr.aria-invalid]="showError('phone')"
+            [attr.aria-describedby]="showError('phone') ? 'contact-phone-error' : null"
+          />
+          @if (showError('phone')) {
+            <small id="contact-phone-error">Informe DDD e número. Exemplo: (11) 98765-4321</small>
+          }
+        </div>
+        <div class="form-field">
+          <label for="contact-type">Tipo de projeto</label>
+          <select id="contact-type" formControlName="projectType">
             <option value="">Selecione</option>
-            <option>Site institucional</option>
-            <option>Landing page</option>
-            <option>E-commerce</option>
-            <option>Sistema web</option>
-            <option>Manutenção</option>
-            <option>Outro</option>
-          </select></label
+            @for (type of projectTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-field form-field--full">
+          <label for="contact-message">Mensagem</label>
+          <textarea
+            id="contact-message"
+            formControlName="message"
+            rows="4"
+            required
+            [attr.aria-invalid]="showError('message')"
+            [attr.aria-describedby]="showError('message') ? 'contact-message-error' : null"
+          ></textarea>
+          @if (showError('message')) {
+            <small id="contact-message-error">
+              Conte em pelo menos {{ minMessageLength }} caracteres o que você precisa.
+            </small>
+          }
+        </div>
+
+        <button
+          class="button-primary"
+          type="submit"
+          [disabled]="status() === 'sending' || mode === 'unavailable'"
         >
-        <label class="form-message"
-          >Mensagem<textarea formControlName="message" rows="4" required></textarea>
-        </label>
-        @if (form.controls.message.touched && form.controls.message.invalid) {
-          <small>Conte brevemente sobre o que precisa.</small>
-        }
-        <button class="button-primary" type="submit">
-          {{ formStatus() ? 'Validar novamente' : 'Enviar mensagem' }}
+          @switch (status()) {
+            @case ('sending') {
+              Enviando…
+            }
+            @default {
+              {{ mode === 'whatsapp' ? 'Enviar pelo WhatsApp' : 'Enviar mensagem' }}
+            }
+          }
         </button>
-        @if (formStatus()) {
-          <p class="form-status" aria-live="polite">{{ formStatus() }}</p>
+
+        <p class="form-status" [class.form-status--error]="status() === 'error'" aria-live="polite">
+          @switch (status()) {
+            @case ('invalid') {
+              Revise os campos destacados.
+            }
+            @case ('success') {
+              {{
+                mode === 'whatsapp'
+                  ? 'Abrimos o WhatsApp com sua mensagem. É só tocar em enviar.'
+                  : 'Mensagem enviada! Vou responder o quanto antes.'
+              }}
+            }
+            @case ('error') {
+              Não foi possível enviar agora. Tente novamente em instantes.
+            }
+          }
+        </p>
+        @if (mode === 'unavailable') {
+          <p class="form-note">O envio pelo formulário estará disponível em breve.</p>
         }
         <p class="form-note">
-          O envio ainda não está conectado. Nenhum dado será enviado por este formulário.
+          Seus dados são usados apenas para responder a este contato e não são compartilhados com
+          terceiros.
         </p>
       </form>
     </div>
-    <!-- TODO: conectar serviço de envio e configurar o canal de WhatsApp -->
   </section>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContactSectionComponent {
   private readonly formBuilder = inject(FormBuilder).nonNullable;
+  private readonly contact = inject(ContactService);
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly injector = inject(Injector);
+  protected readonly mode = this.contact.mode;
+  protected readonly whatsapp = whatsappLink();
+  protected readonly email = SITE_CONFIG.email;
+  protected readonly minMessageLength = 10;
+  protected readonly projectTypes = [
+    'Landing page',
+    'Site institucional',
+    'E-commerce',
+    'Sistema web',
+    'Manutenção',
+    'Outro',
+  ] as const;
+  protected readonly status = signal<'idle' | 'invalid' | 'sending' | 'success' | 'error'>('idle');
+
   readonly form = this.formBuilder.group({
-    name: ['', Validators.required],
+    name: ['', [Validators.required, Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email]],
-    phone: [''],
+    phone: ['', Validators.pattern(/^\(\d{2}\) \d{4,5}-\d{4}$/)],
     projectType: [''],
-    message: ['', Validators.required],
+    message: ['', [Validators.required, Validators.minLength(this.minMessageLength)]],
   });
-  readonly formStatus = signal('');
-  submit(): void {
+
+  protected showError(control: 'name' | 'email' | 'phone' | 'message'): boolean {
+    const field = this.form.controls[control];
+    return field.invalid && field.touched;
+  }
+
+  /** Formata como (00) 0000-0000 ou (00) 00000-0000 enquanto a pessoa digita. */
+  protected maskPhone(): void {
+    const control = this.form.controls.phone;
+    const digits = control.value.replace(/\D/g, '').slice(0, 11);
+    let masked = digits;
+    if (digits.length > 2) masked = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    else if (digits.length > 0) masked = `(${digits}`;
+    if (digits.length > 6) {
+      const split = digits.length === 11 ? 7 : 6;
+      masked = `(${digits.slice(0, 2)}) ${digits.slice(2, split)}-${digits.slice(split)}`;
+    }
+    if (masked !== control.value) control.setValue(masked, { emitEvent: false });
+  }
+
+  async submit(): Promise<void> {
     this.form.markAllAsTouched();
-    this.formStatus.set(
-      this.form.invalid
-        ? 'Revise os campos destacados.'
-        : 'Dados validados. O envio será habilitado quando o serviço de contato estiver configurado.',
-    );
+    if (this.form.invalid) {
+      this.status.set('invalid');
+      afterNextRender(
+        () =>
+          this.host.nativeElement
+            .querySelector<HTMLElement>('.contact-form [aria-invalid="true"]')
+            ?.focus(),
+        { injector: this.injector },
+      );
+      return;
+    }
+    const message = this.form.getRawValue();
+
+    if (this.mode === 'whatsapp') {
+      const url = this.contact.whatsappUrl(message);
+      if (url) window.open(url, '_blank', 'noopener');
+      this.status.set('success');
+      return;
+    }
+
+    this.status.set('sending');
+    try {
+      await this.contact.send(message);
+      this.status.set('success');
+      this.form.reset();
+    } catch {
+      this.status.set('error');
+    }
   }
 }
 

@@ -518,35 +518,55 @@ app-site-footer {
   cursor: not-allowed;
   opacity: 0.72;
 }
-.whatsapp-placeholder {
-  margin-top: 0.75rem;
-}
 .button-primary:focus-visible,
 .faq-item summary:focus-visible,
 .site-footer a:focus-visible {
   outline: 3px solid #34d399;
   outline-offset: 4px;
 }
-.contact-channel {
+.contact-channels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
   margin-top: 2rem;
-  color: #e2e8f0;
 }
-.contact-channel strong {
-  display: block;
-  margin-top: 0.4rem;
+.contact-email {
   color: var(--color-brand-soft);
+  font-weight: 600;
+  text-underline-offset: 0.2em;
+}
+.contact-email:focus-visible {
+  outline: 3px solid #34d399;
+  outline-offset: 4px;
 }
 .contact-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
-.contact-form label {
+.form-field {
   display: grid;
+  align-content: start;
   gap: 0.45rem;
+}
+.form-field--full {
+  grid-column: 1 / -1;
+}
+.contact-form label {
   color: #f8fafc;
   font-size: 0.9rem;
   font-weight: 600;
+}
+.form-optional {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+.contact-form input::placeholder {
+  color: #94a3b8;
+}
+.contact-form [aria-invalid='true'] {
+  border-color: #fca5a5;
 }
 .contact-form input,
 .contact-form select,
@@ -570,10 +590,10 @@ app-site-footer {
   outline-offset: 2px;
 }
 .contact-form small {
-  grid-column: 1 / -1;
   color: #fecaca;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
-.contact-form .form-message,
 .contact-form .button-primary,
 .contact-form .form-status,
 .contact-form .form-note {
@@ -582,6 +602,12 @@ app-site-footer {
 .form-status {
   margin: 0;
   color: var(--color-brand-soft);
+}
+.form-status:empty {
+  display: none;
+}
+.form-status--error {
+  color: #fecaca;
 }
 .form-note {
   margin: 0;
