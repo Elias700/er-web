@@ -78,7 +78,9 @@
 <app-process />
 <app-included />
 <app-about />
-<app-testimonials />
+@if (showTestimonials) {
+  <app-testimonials />
+}
 <app-faq />
 <app-final-cta />
 <app-contact />

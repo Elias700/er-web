@@ -9,6 +9,8 @@ import {
 } from '../../shared/directives/reveal.directive';
 import { AUDIENCE } from './audience.data';
 import { INCLUDED } from './included.data';
+import { TESTIMONIALS } from './testimonials.data';
+import { SITE_CONFIG } from '../../core/config/site.config';
 
 @Component({
   selector: 'app-services',
@@ -211,15 +213,21 @@ export class IncludedSectionComponent {
     aria-labelledby="about-title"
   >
     <div class="section-wrap about-layout">
-      <div
-        class="about-photo"
-        [appParallax]="18"
-        role="img"
-        aria-label="Espaço reservado para a foto do desenvolvedor da ER WEB"
-      >
-        <span>Foto</span><small>Em breve</small>
+      <div class="about-photo" [class.about-photo--empty]="!photo" [appParallax]="18">
+        @if (photo) {
+          <img
+            [src]="photo"
+            [alt]="photoAlt"
+            width="800"
+            height="1000"
+            loading="lazy"
+            decoding="async"
+          />
+        } @else {
+          <!-- Placeholder decorativo até a foto existir (SITE_CONFIG.aboutPhoto) -->
+          <span class="about-photo__monogram" aria-hidden="true">ER</span>
+        }
       </div>
-      <!-- TODO: substituir pelo arquivo da foto quando for enviado -->
       <div class="about-copy" appReveal>
         <p class="section-kicker">Sobre mim</p>
         <h2 id="about-title">Quem está por trás da ER WEB</h2>
@@ -247,7 +255,12 @@ export class IncludedSectionComponent {
   </section>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AboutSectionComponent {}
+export class AboutSectionComponent {
+  protected readonly photo = SITE_CONFIG.aboutPhoto;
+  protected readonly photoAlt = SITE_CONFIG.ownerName
+    ? `Foto de ${SITE_CONFIG.ownerName}, desenvolvedor da ${SITE_CONFIG.companyName}`
+    : `Foto do desenvolvedor da ${SITE_CONFIG.companyName}`;
+}
 
 @Component({
   selector: 'app-testimonials',
@@ -263,36 +276,30 @@ export class AboutSectionComponent {}
         <p class="section-kicker">Depoimentos</p>
         <h2 id="testimonials-title">A experiência de quem trabalhou com a ER WEB</h2>
       </header>
-      <div class="testimonial-placeholder" aria-live="polite" aria-atomic="true">
-        <span aria-hidden="true">“</span>
-        <p>{{ testimonials()[activeIndex()].quote }}</p>
-        <p class="testimonial-byline">{{ testimonials()[activeIndex()].byline }}</p>
-      </div>
-      <div class="testimonial-controls">
-        <button type="button" aria-label="Depoimento anterior" (click)="move(-1)">←</button
-        ><span>{{ activeIndex() + 1 }} / {{ testimonials().length }}</span
-        ><button type="button" aria-label="Próximo depoimento" (click)="move(1)">→</button>
-      </div>
+      @if (testimonials.length) {
+        <div class="testimonial-placeholder" aria-live="polite" aria-atomic="true">
+          <span aria-hidden="true">“</span>
+          <p>{{ testimonials[activeIndex()].quote }}</p>
+          <p class="testimonial-byline">{{ testimonials[activeIndex()].byline }}</p>
+        </div>
+        @if (testimonials.length > 1) {
+          <div class="testimonial-controls">
+            <button type="button" aria-label="Depoimento anterior" (click)="move(-1)">←</button
+            ><span>{{ activeIndex() + 1 }} / {{ testimonials.length }}</span
+            ><button type="button" aria-label="Próximo depoimento" (click)="move(1)">→</button>
+          </div>
+        }
+      }
     </div>
-    <!-- TODO: inserir depoimentos reais somente com autorização -->
   </section>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TestimonialsSectionComponent {
   readonly activeIndex = signal(0);
-  readonly testimonials = signal([
-    {
-      quote: '[Depoimento de cliente a inserir após autorização.]',
-      byline: '[Nome e projeto — confirmar autorização]',
-    },
-    {
-      quote: '[Segundo depoimento real a inserir após autorização.]',
-      byline: '[Nome e projeto — confirmar autorização]',
-    },
-  ] as const);
+  readonly testimonials = TESTIMONIALS;
   move(direction: -1 | 1): void {
     this.activeIndex.update(
-      (index) => (index + direction + this.testimonials().length) % this.testimonials().length,
+      (index) => (index + direction + this.testimonials.length) % this.testimonials.length,
     );
   }
 }
@@ -471,10 +478,42 @@ export class ContactSectionComponent {
         ><a href="#processo">Processo</a><a href="#sobre">Sobre</a><a href="#faq">FAQ</a
         ><a href="#contato">Contato</a>
       </nav>
-      <div class="footer-social" aria-label="Redes sociais a configurar">
-        <span>Redes sociais: a configurar</span><!-- TODO: adicionar perfis sociais reais -->
-      </div>
-      <p>© {{ currentYear }} ER WEB. Todos os direitos reservados.</p>
+      @if (socialLinks.length || email) {
+        <ul class="footer-social" aria-label="Redes sociais e contato">
+          @for (social of socialLinks; track social.id) {
+            <li>
+              <a
+                [href]="social.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                [attr.aria-label]="social.label + ' (abre em nova aba)'"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  @if (social.id === 'instagram') {
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle class="footer-social__dot" cx="17.3" cy="6.7" r="1" />
+                  } @else {
+                    <rect x="3" y="3" width="18" height="18" rx="3" />
+                    <path d="M7.5 10.5v6M7.5 7.5v.01M11.5 16.5v-6M11.5 13c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5v3.5" />
+                  }
+                </svg>
+              </a>
+            </li>
+          }
+          @if (email) {
+            <li>
+              <a [href]="'mailto:' + email" [attr.aria-label]="'Enviar e-mail para ' + email">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="2.5" />
+                  <path d="m4 7 8 6 8-6" />
+                </svg>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+      <p>© {{ currentYear }} {{ companyName }}. Todos os direitos reservados.</p>
       <a class="back-to-top" href="#home">Voltar ao topo ↑</a>
     </div>
   </footer>`,
@@ -482,6 +521,15 @@ export class ContactSectionComponent {
 })
 export class FooterSectionComponent {
   readonly currentYear = new Date().getFullYear();
+  readonly companyName = SITE_CONFIG.companyName;
+  readonly email = SITE_CONFIG.email;
+  /** Só entram as redes com link configurado. */
+  readonly socialLinks = (
+    [
+      { id: 'instagram', label: 'Instagram', url: SITE_CONFIG.social.instagram },
+      { id: 'linkedin', label: 'LinkedIn', url: SITE_CONFIG.social.linkedin },
+    ] as const
+  ).filter((social) => social.url);
 }
 
 export const LANDING_SECTION_COMPONENTS = [

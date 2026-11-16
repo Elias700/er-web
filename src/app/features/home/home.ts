@@ -7,6 +7,8 @@ import {
 } from '../../shared/directives/reveal.directive';
 import { HeroVisualDirective } from './hero-visual.directive';
 import { WhyLandingComponent } from '../why-landing/why-landing';
+import { SITE_CONFIG } from '../../core/config/site.config';
+import { TESTIMONIALS } from '../sections/testimonials.data';
 import {
   AboutSectionComponent,
   AudienceSectionComponent,
@@ -44,4 +46,6 @@ import {
   templateUrl: './home.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent {}
+export class HomeComponent {
+  protected readonly showTestimonials = SITE_CONFIG.showTestimonials && TESTIMONIALS.length > 0;
+}
