@@ -294,11 +294,11 @@ app-home {
   z-index: 1;
   inset: 0;
   background: linear-gradient(112deg, transparent 38%, rgb(255 255 255 / 58%) 49%, transparent 60%);
-  mask-image: url('/imagem-logo.png');
+  mask-image: url('/assets/hero/hero-960.webp');
   mask-repeat: no-repeat;
   mask-position: center;
   mask-size: 100% 100%;
-  -webkit-mask-image: url('/imagem-logo.png');
+  -webkit-mask-image: url('/assets/hero/hero-960.webp');
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-position: center;
   -webkit-mask-size: 100% 100%;

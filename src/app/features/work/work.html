@@ -17,15 +17,20 @@
         <div class="work-phone" aria-label="Prévia navegável do projeto selecionado">
           <div class="work-phone__camera" aria-hidden="true"></div>
           <div class="work-phone__screen">
-            @if (currentProject(); as project) {
-              <iframe
-                class="work-phone__frame"
-                [src]="project.previewUrl"
-                [title]="'Prévia navegável do site ' + project.name"
-                loading="eager"
-                referrerpolicy="strict-origin-when-cross-origin"
-                (load)="onFrameLoad()"
-              ></iframe>
+            <!-- O site externo só carrega quando o celular chega perto da tela -->
+            @defer (on viewport) {
+              @if (currentProject(); as project) {
+                <iframe
+                  class="work-phone__frame"
+                  [src]="project.previewUrl"
+                  [title]="'Prévia navegável do site ' + project.name"
+                  loading="lazy"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  (load)="onFrameLoad()"
+                ></iframe>
+              }
+            } @placeholder {
+              <div class="work-phone__frame" aria-hidden="true"></div>
             }
             @if (isFrameLoading()) {
               <div class="work-phone__loading" aria-live="polite">
