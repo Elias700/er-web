@@ -82,65 +82,152 @@ export class AnimationService {
   }
 
   private removeTicker?: () => void;
+  private readonly setupQueue: (() => void)[] = [];
+  private flushing = false;
+
+  /**
+   * Agenda a criação de uma animação.
+   * - `needsLibraries = false` (reveal/stagger/splitText, só CSS): roda na hora.
+   * - `needsLibraries = true` (GSAP/ScrollTrigger): espera as bibliotecas e roda em
+   *   lotes de ~8 ms, cedendo a thread entre eles, para não gerar tarefas longas (TBT).
+   * Retorna a função de limpeza, que também cancela a tarefa se ela ainda não rodou.
+   */
+  schedule(task: () => () => void, needsLibraries = true): () => void {
+    if (!needsLibraries) return task();
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
+    void this.ready.then(() => {
+      this.setupQueue.push(() => {
+        if (!cancelled) cleanup = task();
+      });
+      this.flushQueue();
+    });
+    return () => {
+      cancelled = true;
+      cleanup?.();
+    };
+  }
+
+  // ----- Revelação ao rolar: só CSS + um IntersectionObserver, sem leituras de layout -----
+
+  private revealObserver?: IntersectionObserver;
+  private readonly revealCallbacks = new WeakMap<Element, () => void>();
+
+  private get prefersReducedMotion(): boolean {
+    return (
+      !isPlatformBrowser(this.platformId) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }
+
+  /** Observa o elemento e chama `onEnter` uma vez quando ele entra (equivale a "top 88%"). */
+  private observeOnce(element: Element, onEnter: () => void): () => void {
+    this.revealObserver ??= new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          this.revealObserver?.unobserve(entry.target);
+          this.revealCallbacks.get(entry.target)?.();
+          this.revealCallbacks.delete(entry.target);
+        }
+      },
+      { rootMargin: '0px 0px -12% 0px' },
+    );
+    this.revealCallbacks.set(element, onEnter);
+    this.revealObserver.observe(element);
+    return () => {
+      this.revealObserver?.unobserve(element);
+      this.revealCallbacks.delete(element);
+    };
+  }
+
+  /**
+   * Prepara elementos com o estado inicial (classe `reveal-pending` + variáveis CSS)
+   * e devolve funções para revelá-los e para limpar tudo.
+   * Depois da transição, as classes saem e o elemento volta aos próprios estilos.
+   */
+  private prepareReveal(
+    items: readonly HTMLElement[],
+    options: { x?: number; y?: number; duration: number; delay: number; step: number },
+  ): { show: () => void; clear: () => void } {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const clear = (): void => {
+      timers.forEach(clearTimeout);
+      for (const item of items) {
+        item.classList.remove('reveal-pending', 'reveal-in');
+        for (const prop of ['--reveal-x', '--reveal-y', '--reveal-duration', '--reveal-delay'])
+          item.style.removeProperty(prop);
+      }
+    };
+    items.forEach((item, index) => {
+      item.style.setProperty('--reveal-x', `${options.x ?? 0}px`);
+      item.style.setProperty('--reveal-y', `${options.y ?? 0}px`);
+      item.style.setProperty('--reveal-duration', `${options.duration}s`);
+      item.style.setProperty('--reveal-delay', `${options.delay + index * options.step}s`);
+      item.classList.add('reveal-pending');
+    });
+    const show = (): void => {
+      items.forEach((item) => item.classList.add('reveal-in'));
+      const total = options.duration + options.delay + items.length * options.step;
+      timers.push(setTimeout(clear, total * 1000 + 100));
+    };
+    return { show, clear };
+  }
 
   reveal(element: HTMLElement, options: RevealOptions = {}): () => void {
-    const gsap = this.gsap;
-    const scrollTrigger = this.scrollTrigger;
-    if (!gsap || !scrollTrigger || this.reducedMotion) return () => undefined;
-
+    if (this.prefersReducedMotion) return () => undefined;
     const distance = options.distance ?? 22;
-    const direction = options.direction ?? 'up';
-    const origin = {
+    const offset = {
       up: { y: distance },
       down: { y: -distance },
       left: { x: distance },
       right: { x: -distance },
-    }[direction];
-    let context: ReturnType<typeof gsap.context> | undefined;
-    this.zone.runOutsideAngular(() => {
-      context = gsap.context(() => {
-        gsap.fromTo(
-          element,
-          { ...origin, autoAlpha: 0 },
-          {
-            x: 0,
-            y: 0,
-            autoAlpha: 1,
-            duration: options.duration ?? 0.65,
-            delay: options.delay ?? 0,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: element, start: 'top 88%', once: true },
-          },
-        );
-      }, element);
+    }[options.direction ?? 'up'];
+    const { show, clear } = this.prepareReveal([element], {
+      ...offset,
+      duration: options.duration ?? 0.65,
+      delay: options.delay ?? 0,
+      step: 0,
     });
-    return () => context?.revert();
+    const stop = this.observeOnce(element, show);
+    return () => {
+      stop();
+      clear();
+    };
   }
 
   stagger(element: HTMLElement, selector: string, options: RevealOptions = {}): () => void {
-    const gsap = this.gsap;
-    if (!gsap || this.reducedMotion) return () => undefined;
-    const children = element.querySelectorAll<HTMLElement>(selector);
+    if (this.prefersReducedMotion) return () => undefined;
+    const children = [...element.querySelectorAll<HTMLElement>(selector)];
     if (!children.length) return () => undefined;
-    let context: ReturnType<typeof gsap.context> | undefined;
-    this.zone.runOutsideAngular(() => {
-      context = gsap.context(() => {
-        gsap.fromTo(
-          children,
-          { y: options.distance ?? 18, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: options.duration ?? 0.55,
-            delay: options.delay ?? 0,
-            stagger: 0.1,
-            ease: 'power2.out',
-            scrollTrigger: { trigger: element, start: 'top 88%', once: true },
-          },
-        );
-      }, element);
+    const { show, clear } = this.prepareReveal(children, {
+      y: options.distance ?? 18,
+      duration: options.duration ?? 0.55,
+      delay: options.delay ?? 0,
+      step: 0.1,
     });
-    return () => context?.revert();
+    const stop = this.observeOnce(element, show);
+    return () => {
+      stop();
+      clear();
+    };
+  }
+
+  private flushQueue(): void {
+    if (this.flushing) return;
+    this.flushing = true;
+    const run = (): void => {
+      const start = performance.now();
+      while (this.setupQueue.length && performance.now() - start < 8) {
+        this.setupQueue.shift()?.();
+      }
+      if (this.setupQueue.length) {
+        setTimeout(run, 0);
+      } else {
+        this.flushing = false;
+      }
+    };
+    this.zone.runOutsideAngular(() => setTimeout(run, 0));
   }
 
   parallax(element: HTMLElement, distance = 24): () => void {
@@ -171,23 +258,20 @@ export class AnimationService {
   }
 
   splitText(element: HTMLElement, selector: string): () => void {
-    const gsap = this.gsap;
-    if (!gsap || this.reducedMotion) return () => undefined;
-    const words = element.querySelectorAll<HTMLElement>(selector);
+    if (this.prefersReducedMotion) return () => undefined;
+    const words = [...element.querySelectorAll<HTMLElement>(selector)];
     if (!words.length) return () => undefined;
-    let context: ReturnType<typeof gsap.context> | undefined;
-    this.zone.runOutsideAngular(() => {
-      context = gsap.context(
-        () =>
-          gsap.fromTo(
-            words,
-            { y: 18, autoAlpha: 0 },
-            { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.045, ease: 'power2.out' },
-          ),
-        element,
-      );
+    const { show, clear } = this.prepareReveal(words, {
+      y: 18,
+      duration: 0.6,
+      delay: 0.05,
+      step: 0.045,
     });
-    return () => context?.revert();
+    const stop = this.observeOnce(element, show);
+    return () => {
+      stop();
+      clear();
+    };
   }
 
   animateHeroVisual(
@@ -206,19 +290,18 @@ export class AnimationService {
       context = gsap.context(() => {
         gsap.set(image, { transformPerspective: 1100, transformOrigin: 'center center' });
 
+        // Sem animar a opacidade: a imagem é o LCP e precisa estar visível desde o início.
         const entrance = gsap.timeline();
         entrance.fromTo(
           image,
-          { x: 52, y: 34, rotateY: -18, rotateX: 8, scale: 0.9, autoAlpha: 0 },
+          { x: 52, y: 34, rotateY: -18, rotateX: 8, scale: 0.9 },
           {
             x: 0,
             y: 0,
             rotateY: 0,
             rotateX: 0,
             scale: 1,
-            autoAlpha: 1,
             duration: 1.2,
-            delay: 0.3,
             ease: 'expo.out',
           },
         );

@@ -10,7 +10,6 @@ app-site-footer {
 }
 .content-section {
   padding: clamp(4rem, 8vw, 7.5rem) 1.25rem;
-  scroll-margin-top: 5rem;
 }
 .section-wrap {
   width: min(100%, 74rem);
@@ -778,4 +777,16 @@ app-site-footer {
     translate: none;
     scale: none;
   }
+}
+
+/* Espaço reservado das seções adiadas (@defer) até renderizarem */
+.defer-slot {
+  min-height: 100svh;
+  background: var(--color-brand-light);
+}
+.defer-slot--dark {
+  background: var(--color-brand-surface);
+}
+.defer-slot--short {
+  min-height: 12rem;
 }

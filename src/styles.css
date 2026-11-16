@@ -1,5 +1,24 @@
 @import 'tailwindcss';
 
+/* Fontes de reserva com métricas ajustadas (medidas contra Arial) para que a troca
+ * pela fonte web não mude a altura do texto e não gere layout shift (CLS). */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 106.39%;
+  ascent-override: 91.18%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial');
+  size-adjust: 100.8%;
+  ascent-override: 97.23%;
+  descent-override: 28.77%;
+  line-gap-override: 0%;
+}
+
 @theme {
   --color-brand-text: #0f172a;
   --color-brand-ink: #071713;
@@ -9,16 +28,14 @@
   --color-brand-muted: #cbd5e1;
   --color-brand-soft: #d1fae5;
   --color-brand-light: #f8fafc;
-  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
-  --font-interface: 'Inter', 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', 'Segoe UI', sans-serif;
+  --font-interface: 'Inter', 'Inter Fallback', 'Segoe UI', sans-serif;
 }
 
+/* Compensa o header fixo (5rem) ao navegar por âncoras. Um único recuo:
+   não somar com scroll-margin nas seções. */
 html {
-  scroll-padding-top: 5.5rem;
-}
-
-:target {
-  scroll-margin-top: 5.5rem;
+  scroll-padding-top: 5rem;
 }
 
 html {
@@ -492,4 +509,19 @@ body {
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid #34d399;
   outline-offset: 3px;
+}
+
+/* Revelação ao rolar (AnimationService.reveal/stagger/splitText).
+ * Classe dobrada para vencer o `transition` próprio de cards durante a entrada;
+ * as classes são removidas ao fim da transição. */
+.reveal-pending.reveal-pending {
+  opacity: 0;
+  translate: var(--reveal-x, 0) var(--reveal-y, 0);
+  transition:
+    opacity var(--reveal-duration, 0.65s) ease var(--reveal-delay, 0s),
+    translate var(--reveal-duration, 0.65s) cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
+}
+.reveal-pending.reveal-in {
+  opacity: 1;
+  translate: 0 0;
 }

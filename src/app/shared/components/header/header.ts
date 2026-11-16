@@ -65,30 +65,10 @@ export class HeaderComponent {
           currentY > this.previousScrollY && currentY > 240 && !this.menuOpen(),
         );
         this.previousScrollY = currentY;
+        this.updateActiveSection();
       });
 
-    afterNextRender(
-      () => {
-        const sections = this.navigationItems
-          .map((item) => item.href)
-          .filter((href): href is string => href !== null)
-          .map((href) => document.querySelector<HTMLElement>(href))
-          .filter((section): section is HTMLElement => section !== null);
-        const observer = new IntersectionObserver(
-          (entries) => {
-            const visible = entries
-              .filter((entry) => entry.isIntersecting)
-              .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-            const id = visible?.target.id;
-            if (id) this.activeNavigation.set(id);
-          },
-          { rootMargin: '-25% 0px -60% 0px', threshold: [0, 0.2, 0.5] },
-        );
-        sections.forEach((section) => observer.observe(section));
-        this.destroyRef.onDestroy(() => observer.disconnect());
-      },
-      { injector: this.injector },
-    );
+    afterNextRender(() => this.updateActiveSection(), { injector: this.injector });
 
     fromEvent(window, 'resize')
       .pipe(auditTime(100), takeUntilDestroyed(this.destroyRef))
@@ -102,6 +82,21 @@ export class HeaderComponent {
           }
         }
       });
+  }
+
+  /**
+   * Marca no menu a última seção cujo topo já passou de 35% da altura da tela.
+   * Busca os elementos pelo id a cada vez, porque as seções adiadas (@defer)
+   * trocam o placeholder pelo conteúdo real depois do carregamento.
+   */
+  private updateActiveSection(): void {
+    const line = window.innerHeight * 0.35;
+    let active = this.navigationItems[0]?.value ?? 'home';
+    for (const item of this.navigationItems) {
+      const section = item.href ? document.getElementById(item.href.slice(1)) : null;
+      if (section && section.getBoundingClientRect().top <= line) active = item.value;
+    }
+    if (active !== this.activeNavigation()) this.activeNavigation.set(active);
   }
 
   protected toggleMenu(): void {

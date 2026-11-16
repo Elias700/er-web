@@ -7,7 +7,7 @@ app-why-landing {
 }
 
 .why-section h3,
-.why-section h4 {
+.why-journey__title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
@@ -230,11 +230,11 @@ app-why-landing {
   font-weight: 700;
   letter-spacing: 0.12em;
 }
-.why-journey__step h4 {
+.why-journey__title {
   margin-top: 0.35rem;
   font-size: 1.1rem;
 }
-.why-journey__step p {
+.why-journey__text {
   max-width: 15rem;
   margin: 0.4rem 0 0;
   color: var(--color-section-muted);
@@ -413,7 +413,7 @@ app-why-landing {
   .why-journey__number {
     margin-top: 0;
   }
-  .why-journey__step p {
+  .why-journey__text {
     max-width: none;
   }
   .why-compare {

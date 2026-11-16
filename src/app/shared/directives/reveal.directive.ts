@@ -1,4 +1,3 @@
-import { isPlatformBrowser } from '@angular/common';
 import {
   Directive,
   DestroyRef,
@@ -6,7 +5,6 @@ import {
   Injector,
   Input,
   NgZone,
-  PLATFORM_ID,
   afterNextRender,
   booleanAttribute,
   inject,
@@ -15,206 +13,124 @@ import {
 } from '@angular/core';
 import { AnimationService, type RevealDirection } from '../../core/animations/animation.service';
 
+/**
+ * Base das diretivas de scroll: depois do primeiro render, agenda a criação da
+ * animação na fila do AnimationService (que cede a thread entre lotes) e
+ * desfaz tudo ao destruir.
+ */
+@Directive()
+abstract class ScheduledAnimationDirective implements OnDestroy {
+  protected readonly element: ElementRef<HTMLElement> = inject(ElementRef);
+  protected readonly animations = inject(AnimationService);
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private cleanup?: () => void;
+
+  constructor() {
+    afterNextRender(
+      () => {
+        if (this.destroyRef.destroyed) return;
+        this.cleanup = this.animations.schedule(() => this.setup(), this.needsLibraries);
+      },
+      { injector: this.injector },
+    );
+  }
+
+  /** false para animações só de CSS (não esperam o GSAP carregar). */
+  protected readonly needsLibraries: boolean = true;
+
+  /** Cria a animação e retorna a função que a desfaz. */
+  protected abstract setup(): () => void;
+
+  ngOnDestroy(): void {
+    this.cleanup?.();
+  }
+}
+
 @Directive({ selector: '[appReveal]', standalone: true })
-export class RevealDirective implements OnDestroy {
+export class RevealDirective extends ScheduledAnimationDirective {
+  protected override readonly needsLibraries = false;
   @Input({ transform: booleanAttribute }) appReveal = false;
   @Input() revealDelay = 0;
   @Input() revealDuration = 0.65;
   @Input() revealDistance = 22;
   @Input() revealDirection: RevealDirection = 'up';
 
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private readonly animations = inject(AnimationService);
-  private readonly platformId = inject(PLATFORM_ID);
-  private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
-  private cleanup?: () => void;
-
-  constructor() {
-    afterNextRender(
-      () => {
-        void this.animations.ready.then(() => {
-          if (this.destroyRef.destroyed) return;
-          if (isPlatformBrowser(this.platformId) && this.appReveal) {
-            this.cleanup = this.animations.reveal(this.element.nativeElement, {
-              delay: this.revealDelay,
-              duration: this.revealDuration,
-              distance: this.revealDistance,
-              direction: this.revealDirection,
-            });
-          }
-        });
-      },
-      { injector: this.injector },
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.cleanup?.();
+  protected setup(): () => void {
+    if (!this.appReveal) return () => undefined;
+    return this.animations.reveal(this.element.nativeElement, {
+      delay: this.revealDelay,
+      duration: this.revealDuration,
+      distance: this.revealDistance,
+      direction: this.revealDirection,
+    });
   }
 }
 
 @Directive({ selector: '[appStagger]', standalone: true })
-export class StaggerDirective implements OnDestroy {
+export class StaggerDirective extends ScheduledAnimationDirective {
+  protected override readonly needsLibraries = false;
   @Input() appStagger = '[data-stagger-item]';
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private readonly animations = inject(AnimationService);
-  private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
-  private cleanup?: () => void;
 
-  constructor() {
-    afterNextRender(
-      () => {
-        void this.animations.ready.then(() => {
-          if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.stagger(
-              this.element.nativeElement,
-              this.appStagger || '[data-stagger-item]',
-            );
-        });
-      },
-      { injector: this.injector },
+  protected setup(): () => void {
+    return this.animations.stagger(
+      this.element.nativeElement,
+      this.appStagger || '[data-stagger-item]',
     );
-  }
-
-  ngOnDestroy(): void {
-    this.cleanup?.();
   }
 }
 
 @Directive({ selector: '[appParallax]', standalone: true })
-export class ParallaxDirective implements OnDestroy {
+export class ParallaxDirective extends ScheduledAnimationDirective {
   @Input({ transform: numberAttribute }) appParallax = 24;
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private readonly animations = inject(AnimationService);
-  private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
-  private cleanup?: () => void;
 
-  constructor() {
-    afterNextRender(
-      () => {
-        void this.animations.ready.then(() => {
-          if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.parallax(this.element.nativeElement, this.appParallax);
-        });
-      },
-      { injector: this.injector },
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.cleanup?.();
+  protected setup(): () => void {
+    return this.animations.parallax(this.element.nativeElement, this.appParallax);
   }
 }
 
 @Directive({ selector: '[appSplitText]', standalone: true })
-export class SplitTextDirective implements OnDestroy {
+export class SplitTextDirective extends ScheduledAnimationDirective {
+  protected override readonly needsLibraries = false;
   @Input() appSplitText = '[data-split-word]';
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private readonly animations = inject(AnimationService);
-  private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
-  private cleanup?: () => void;
-  constructor() {
-    afterNextRender(
-      () => {
-        void this.animations.ready.then(() => {
-          if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.splitText(
-              this.element.nativeElement,
-              this.appSplitText || '[data-split-word]',
-            );
-        });
-      },
-      { injector: this.injector },
+
+  protected setup(): () => void {
+    return this.animations.splitText(
+      this.element.nativeElement,
+      this.appSplitText || '[data-split-word]',
     );
-  }
-  ngOnDestroy(): void {
-    this.cleanup?.();
   }
 }
 
 @Directive({ selector: '[appCounter]', standalone: true })
-export class CounterDirective implements OnDestroy {
+export class CounterDirective extends ScheduledAnimationDirective {
   @Input() appCounter = 0;
   @Input() counterDuration = 1.2;
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private readonly animations = inject(AnimationService);
-  private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
-  private cleanup?: () => void;
-  constructor() {
-    afterNextRender(
-      () => {
-        void this.animations.ready.then(() => {
-          if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.counter(
-              this.element.nativeElement,
-              this.appCounter,
-              this.counterDuration,
-            );
-        });
-      },
-      { injector: this.injector },
-    );
-  }
-  ngOnDestroy(): void {
-    this.cleanup?.();
+
+  protected setup(): () => void {
+    return this.animations.counter(this.element.nativeElement, this.appCounter, this.counterDuration);
   }
 }
 
 @Directive({ selector: '[appScrollProgress]', standalone: true })
-export class ScrollProgressDirective implements OnDestroy {
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private readonly animations = inject(AnimationService);
-  private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
-  private cleanup?: () => void;
-  constructor() {
-    afterNextRender(
-      () => {
-        void this.animations.ready.then(() => {
-          if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.progress(this.element.nativeElement);
-        });
-      },
-      { injector: this.injector },
-    );
-  }
-  ngOnDestroy(): void {
-    this.cleanup?.();
+export class ScrollProgressDirective extends ScheduledAnimationDirective {
+  protected setup(): () => void {
+    return this.animations.progress(this.element.nativeElement);
   }
 }
 
 /** Escreve o progresso do scroll em `--scroll-progress` (0 → 1) no elemento. */
 @Directive({ selector: '[appScrollVariable]', standalone: true })
-export class ScrollVariableDirective implements OnDestroy {
+export class ScrollVariableDirective extends ScheduledAnimationDirective {
   @Input() scrollStart = 'top 75%';
   @Input() scrollEnd = 'bottom 55%';
-  private readonly element = inject(ElementRef<HTMLElement>);
-  private readonly animations = inject(AnimationService);
-  private readonly injector = inject(Injector);
-  private readonly destroyRef = inject(DestroyRef);
-  private cleanup?: () => void;
-  constructor() {
-    afterNextRender(
-      () => {
-        void this.animations.ready.then(() => {
-          if (!this.destroyRef.destroyed)
-            this.cleanup = this.animations.scrollVariable(
-              this.element.nativeElement,
-              this.scrollStart,
-              this.scrollEnd,
-            );
-        });
-      },
-      { injector: this.injector },
+
+  protected setup(): () => void {
+    return this.animations.scrollVariable(
+      this.element.nativeElement,
+      this.scrollStart,
+      this.scrollEnd,
     );
-  }
-  ngOnDestroy(): void {
-    this.cleanup?.();
   }
 }
 
@@ -223,7 +139,7 @@ export class ScrollVariableDirective implements OnDestroy {
   standalone: true,
 })
 export class MagneticDirective {
-  private readonly element = inject(ElementRef<HTMLElement>);
+  private readonly element: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly zone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);

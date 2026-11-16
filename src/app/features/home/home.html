@@ -73,17 +73,70 @@
   </div>
 </section>
 
-<app-why-landing />
-<app-services />
-<app-audience />
-<app-work />
-<app-process />
-<app-included />
-<app-about />
-@if (showTestimonials) {
-  <app-testimonials />
+<!--
+  Seções abaixo da dobra: renderizam ao chegar perto da tela ou após um pequeno
+  atraso escalonado (cada uma em sua própria tarefa curta, sem bloquear o carregamento).
+  O placeholder usa o mesmo id da seção, para links do menu e âncoras funcionarem antes.
+-->
+@defer (on viewport; on timer(250ms); when renderAll) {
+  <app-why-landing />
+} @placeholder {
+  <div id="por-que" class="defer-slot"></div>
 }
-<app-faq />
-<app-final-cta />
-<app-contact />
-<app-site-footer />
+@defer (on viewport; on timer(400ms); when renderAll) {
+  <app-services />
+} @placeholder {
+  <div id="servicos" class="defer-slot"></div>
+}
+@defer (on viewport; on timer(550ms); when renderAll) {
+  <app-audience />
+} @placeholder {
+  <div id="para-quem" class="defer-slot"></div>
+}
+@defer (on viewport; on timer(700ms); when renderAll) {
+  <app-work />
+} @placeholder {
+  <div id="trabalhos" class="defer-slot defer-slot--dark"></div>
+}
+@defer (on viewport; on timer(850ms); when renderAll) {
+  <app-process />
+} @placeholder {
+  <div id="processo" class="defer-slot defer-slot--dark"></div>
+}
+@defer (on viewport; on timer(1000ms); when renderAll) {
+  <app-included />
+} @placeholder {
+  <div id="incluso" class="defer-slot"></div>
+}
+@defer (on viewport; on timer(1150ms); when renderAll) {
+  <app-about />
+} @placeholder {
+  <div id="sobre" class="defer-slot defer-slot--dark"></div>
+}
+@if (showTestimonials) {
+  @defer (on viewport; on timer(1300ms); when renderAll) {
+    <app-testimonials />
+  } @placeholder {
+    <div id="depoimentos" class="defer-slot"></div>
+  }
+}
+@defer (on viewport; on timer(1450ms); when renderAll) {
+  <app-faq />
+} @placeholder {
+  <div id="faq" class="defer-slot"></div>
+}
+@defer (on viewport; on timer(1600ms); when renderAll) {
+  <app-final-cta />
+} @placeholder {
+  <div id="orcamento" class="defer-slot defer-slot--dark"></div>
+}
+@defer (on viewport; on timer(1750ms); when renderAll) {
+  <app-contact />
+} @placeholder {
+  <div id="contato" class="defer-slot defer-slot--dark"></div>
+}
+@defer (on viewport; on timer(1900ms); when renderAll) {
+  <app-site-footer />
+} @placeholder {
+  <div class="defer-slot defer-slot--dark defer-slot--short"></div>
+}
