@@ -9,10 +9,12 @@ import { HeroVisualDirective } from './hero-visual.directive';
 import { WhyLandingComponent } from '../why-landing/why-landing';
 import {
   AboutSectionComponent,
+  AudienceSectionComponent,
   ContactSectionComponent,
   FaqSectionComponent,
   FinalCtaSectionComponent,
   FooterSectionComponent,
+  IncludedSectionComponent,
   ProcessSectionComponent,
   ServicesSectionComponent,
   TestimonialsSectionComponent,
@@ -29,7 +31,9 @@ import {
     HeroVisualDirective,
     WhyLandingComponent,
     ServicesSectionComponent,
+    AudienceSectionComponent,
     ProcessSectionComponent,
+    IncludedSectionComponent,
     AboutSectionComponent,
     TestimonialsSectionComponent,
     FaqSectionComponent,

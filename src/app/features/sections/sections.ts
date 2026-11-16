@@ -7,13 +7,15 @@ import {
   ScrollProgressDirective,
   StaggerDirective,
 } from '../../shared/directives/reveal.directive';
+import { AUDIENCE } from './audience.data';
+import { INCLUDED } from './included.data';
 
 @Component({
   selector: 'app-services',
   standalone: true,
   imports: [RevealDirective, StaggerDirective],
   template: ` <section
-    class="content-section section-light"
+    class="content-section section-light section-white"
     id="servicos"
     aria-labelledby="services-title"
   >
@@ -75,6 +77,42 @@ export class ServicesSectionComponent {
 }
 
 @Component({
+  selector: 'app-audience',
+  standalone: true,
+  imports: [RevealDirective, StaggerDirective],
+  template: ` <section
+    class="content-section audience-section"
+    id="para-quem"
+    aria-labelledby="audience-title"
+  >
+    <div class="section-wrap">
+      <header class="section-heading" appReveal>
+        <p class="section-kicker">{{ content.kicker }}</p>
+        <h2 id="audience-title">{{ content.title }}</h2>
+        <p>{{ content.subtitle }}</p>
+      </header>
+      <ul class="audience-grid" appStagger>
+        @for (niche of content.niches; track niche.name) {
+          <li class="audience-card" data-stagger-item>
+            <span class="audience-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path [attr.d]="niche.icon" /></svg>
+            </span>
+            <span class="audience-name">{{ niche.name }}</span>
+          </li>
+        }
+      </ul>
+      <p class="audience-closing" appReveal>
+        {{ content.closing }} <a href="#contato">{{ content.closingLink }}</a>
+      </p>
+    </div>
+  </section>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AudienceSectionComponent {
+  protected readonly content = AUDIENCE;
+}
+
+@Component({
   selector: 'app-process',
   standalone: true,
   imports: [RevealDirective, ScrollProgressDirective],
@@ -125,6 +163,42 @@ export class ProcessSectionComponent {
     },
     { title: 'Suporte', description: 'Alinhamos os cuidados e próximos ajustes após a entrega.' },
   ] as const;
+}
+
+@Component({
+  selector: 'app-included',
+  standalone: true,
+  imports: [RevealDirective, StaggerDirective],
+  template: ` <section
+    class="content-section section-light"
+    id="incluso"
+    aria-labelledby="included-title"
+  >
+    <div class="section-wrap included-layout">
+      <header class="section-heading section-heading--left" appReveal>
+        <p class="section-kicker">{{ content.kicker }}</p>
+        <h2 id="included-title">{{ content.title }}</h2>
+        <p>{{ content.subtitle }}</p>
+      </header>
+      <ul class="included-list" appStagger>
+        @for (item of content.items; track item.title) {
+          <li data-stagger-item>
+            <span class="included-check" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+            </span>
+            <div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.description }}</p>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  </section>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class IncludedSectionComponent {
+  protected readonly content = INCLUDED;
 }
 
 @Component({
@@ -412,7 +486,9 @@ export class FooterSectionComponent {
 
 export const LANDING_SECTION_COMPONENTS = [
   ServicesSectionComponent,
+  AudienceSectionComponent,
   ProcessSectionComponent,
+  IncludedSectionComponent,
   AboutSectionComponent,
   TestimonialsSectionComponent,
   FaqSectionComponent,
