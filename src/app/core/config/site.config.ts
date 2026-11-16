@@ -13,7 +13,8 @@ export interface SiteConfig {
   readonly whatsapp: {
     /** Somente dígitos, com DDI e DDD. Ex.: '5511999999999'. */
     readonly number: string;
-    readonly defaultMessage: string;
+    /** Saudação inicial de todas as mensagens enviadas pelo site. */
+    readonly greeting: string;
   };
   readonly social: {
     readonly instagram: string;
@@ -39,8 +40,8 @@ export const SITE_CONFIG: SiteConfig = {
     'Sites e landing pages para empresas e profissionais apresentarem seus serviços e receberem contatos pelo WhatsApp.',
   email: '', // TODO: e-mail de contato
   whatsapp: {
-    number: '', // TODO: número com DDI e DDD, só dígitos, ex.: '5511999999999'
-    defaultMessage: 'Olá! Vim pelo site da ER WEB e gostaria de solicitar um orçamento.',
+    number: '5571984231897',
+    greeting: 'Olá, Elias! Vim pelo site da ER WEB e gostaria de um orçamento.',
   },
   social: {
     instagram: 'https://www.instagram.com/er.web_/',
@@ -56,8 +57,20 @@ export const SITE_CONFIG: SiteConfig = {
 };
 
 /** Monta o link do WhatsApp. Retorna null se o número não estiver configurado. */
-export function whatsappLink(message: string = SITE_CONFIG.whatsapp.defaultMessage): string | null {
+export function whatsappLink(message: string = SITE_CONFIG.whatsapp.greeting): string | null {
   const number = SITE_CONFIG.whatsapp.number.replace(/\D/g, '');
   if (!number) return null;
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Número formatado para exibição. Ex.: '5571984231897' → '(71) 98423-1897'.
+ * Remove o DDI 55 quando presente.
+ */
+export function formatWhatsappNumber(number: string = SITE_CONFIG.whatsapp.number): string {
+  let digits = number.replace(/\D/g, '');
+  if (digits.length > 11 && digits.startsWith('55')) digits = digits.slice(2);
+  if (digits.length === 11) return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  if (digits.length === 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return digits;
 }

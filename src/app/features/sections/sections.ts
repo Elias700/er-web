@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   Injector,
+  PLATFORM_ID,
   afterNextRender,
   inject,
   signal,
@@ -20,8 +21,9 @@ import { INCLUDED } from './included.data';
 import { TESTIMONIALS } from './testimonials.data';
 import { VISIBLE_FAQ, formatPrice, type FaqSegment } from './faq.data';
 import { PROJECT_TYPES } from './contact.data';
-import { SITE_CONFIG, whatsappLink } from '../../core/config/site.config';
-import { ContactService } from '../../core/contact/contact.service';
+import { isPlatformBrowser } from '@angular/common';
+import { SITE_CONFIG, formatWhatsappNumber, whatsappLink } from '../../core/config/site.config';
+import { ContactService, type ContactResult } from '../../core/contact/contact.service';
 
 @Component({
   selector: 'app-services',
@@ -431,16 +433,32 @@ export class FinalCtaSectionComponent {}
         <h2 id="contact-title">Vamos falar do seu projeto</h2>
         <p>Conte o que você precisa. Eu respondo com os próximos passos e uma proposta.</p>
         @if (whatsapp || email) {
-          <div class="contact-channels">
+          <ul class="contact-channels" aria-label="Canais de contato">
             @if (whatsapp) {
-              <a class="button-primary" [href]="whatsapp" target="_blank" rel="noopener noreferrer"
-                >Chamar no WhatsApp <span aria-hidden="true">↗</span></a
-              >
+              <li>
+                <span class="contact-channel__label">WhatsApp</span>
+                <a
+                  class="contact-channel__link"
+                  [href]="whatsapp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="'Conversar no WhatsApp: ' + whatsappNumber + ' (abre em nova aba)'"
+                >
+                  <svg class="whatsapp-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4.5 19.5 5.6 16A8 8 0 1 1 8.4 18.6Z" />
+                    <path d="M9.2 9.4c.3 2.3 2.1 4.2 4.5 4.7l1-1 1.6.8" />
+                  </svg>
+                  {{ whatsappNumber }}
+                </a>
+              </li>
             }
             @if (email) {
-              <a class="contact-email" [href]="'mailto:' + email">{{ email }}</a>
+              <li>
+                <span class="contact-channel__label">E-mail</span>
+                <a class="contact-channel__link" [href]="'mailto:' + email">{{ email }}</a>
+              </li>
             }
-          </div>
+          </ul>
         }
       </header>
       <form class="contact-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -536,44 +554,56 @@ export class FinalCtaSectionComponent {}
           }
         </div>
 
-        <button
-          class="button-primary"
-          type="submit"
-          [disabled]="status() === 'sending' || mode === 'unavailable'"
-        >
-          @switch (status()) {
-            @case ('sending') {
-              Enviando…
-            }
-            @default {
-              {{ mode === 'whatsapp' ? 'Enviar pelo WhatsApp' : 'Enviar mensagem' }}
-            }
-          }
-        </button>
-
-        <p class="form-status" [class.form-status--error]="status() === 'error'" aria-live="polite">
-          @switch (status()) {
-            @case ('invalid') {
-              Revise os campos destacados.
-            }
-            @case ('success') {
+        @if (status() === 'success') {
+          <div class="form-success" role="status">
+            <p>
               {{
-                mode === 'whatsapp'
-                  ? 'Abrimos o WhatsApp com sua mensagem. É só tocar em enviar.'
+                sentUrl()
+                  ? 'Abrimos o WhatsApp com sua mensagem. É só tocar em enviar por lá!'
                   : 'Mensagem enviada! Vou responder o quanto antes.'
               }}
+            </p>
+            @if (sentUrl(); as url) {
+              <a class="form-success__retry" [href]="url" target="_blank" rel="noopener noreferrer"
+                >Não abriu? Clique aqui</a
+              >
             }
-            @case ('error') {
-              Não foi possível enviar agora. Tente novamente em instantes.
+            <button type="button" class="form-reset" (click)="resetForm()">
+              Enviar outra mensagem
+            </button>
+          </div>
+        } @else {
+          <button class="button-primary" type="submit" [disabled]="status() === 'sending'">
+            @if (status() === 'sending') {
+              Enviando…
+            } @else if (channel === 'whatsapp') {
+              <svg class="whatsapp-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4.5 19.5 5.6 16A8 8 0 1 1 8.4 18.6Z" />
+                <path d="M9.2 9.4c.3 2.3 2.1 4.2 4.5 4.7l1-1 1.6.8" />
+              </svg>
+              Enviar pelo WhatsApp
+            } @else {
+              Enviar mensagem
             }
-          }
-        </p>
-        @if (mode === 'unavailable') {
-          <p class="form-note">O envio pelo formulário estará disponível em breve.</p>
+          </button>
+          <p
+            class="form-status"
+            [class.form-status--error]="status() === 'error'"
+            aria-live="polite"
+          >
+            @switch (status()) {
+              @case ('invalid') {
+                Revise os campos destacados.
+              }
+              @case ('error') {
+                Não foi possível enviar agora. Tente novamente em instantes.
+              }
+            }
+          </p>
         }
         <p class="form-note">
-          Seus dados são usados apenas para responder a este contato e não são compartilhados com
-          terceiros.
+          Ao clicar em enviar, você será direcionado ao WhatsApp com sua mensagem pronta. Seus dados
+          são usados só para responder o seu contato.
         </p>
       </form>
     </div>
@@ -585,12 +615,16 @@ export class ContactSectionComponent {
   private readonly contact = inject(ContactService);
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly injector = inject(Injector);
-  protected readonly mode = this.contact.mode;
+  private readonly platformId = inject(PLATFORM_ID);
+  protected readonly channel = this.contact.channel;
   protected readonly whatsapp = whatsappLink();
+  protected readonly whatsappNumber = formatWhatsappNumber();
   protected readonly email = SITE_CONFIG.email;
   protected readonly minMessageLength = 10;
   protected readonly projectTypes = PROJECT_TYPES;
   protected readonly status = signal<'idle' | 'invalid' | 'sending' | 'success' | 'error'>('idle');
+  /** URL aberta no último envio pelo WhatsApp (para o link "Não abriu? Clique aqui"). */
+  protected readonly sentUrl = signal<string | null>(null);
 
   readonly form = this.formBuilder.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
@@ -621,7 +655,11 @@ export class ContactSectionComponent {
     if (masked !== control.value) control.setValue(masked, { emitEvent: false });
   }
 
-  async submit(): Promise<void> {
+  /**
+   * Sem await antes do window.open: o navegador só permite abrir uma nova aba
+   * se isso acontecer no mesmo clique (senão bloqueia como pop-up).
+   */
+  submit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid) {
       this.status.set('invalid');
@@ -634,23 +672,48 @@ export class ContactSectionComponent {
       );
       return;
     }
-    const message = this.form.getRawValue();
 
-    if (this.mode === 'whatsapp') {
-      const url = this.contact.whatsappUrl(message);
-      if (url) window.open(url, '_blank', 'noopener');
-      this.status.set('success');
+    let result: ContactResult | Promise<ContactResult>;
+    try {
+      result = this.contact.send(this.form.getRawValue());
+    } catch {
+      this.status.set('error');
       return;
     }
 
-    this.status.set('sending');
-    try {
-      await this.contact.send(message);
-      this.status.set('success');
-      this.form.reset();
-    } catch {
-      this.status.set('error');
+    if (!(result instanceof Promise)) {
+      this.handleResult(result);
+      return;
     }
+
+    // Envio assíncrono (ex.: e-mail no futuro)
+    this.status.set('sending');
+    result.then(
+      (value) => this.handleResult(value),
+      () => this.status.set('error'),
+    );
+  }
+
+  private handleResult(result: ContactResult): void {
+    if (result.kind === 'redirect') {
+      if (isPlatformBrowser(this.platformId)) window.open(result.url, '_blank', 'noopener');
+      this.sentUrl.set(result.url);
+    } else {
+      this.sentUrl.set(null);
+    }
+    // O formulário não é limpo: a pessoa pode tentar de novo se precisar.
+    this.status.set('success');
+  }
+
+  /** "Enviar outra mensagem": limpa o formulário e volta ao estado inicial. */
+  protected resetForm(): void {
+    this.form.reset();
+    this.sentUrl.set(null);
+    this.status.set('idle');
+    afterNextRender(
+      () => this.host.nativeElement.querySelector<HTMLElement>('#contact-name')?.focus(),
+      { injector: this.injector },
+    );
   }
 }
 

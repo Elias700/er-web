@@ -553,20 +553,93 @@ app-site-footer {
   outline-offset: 4px;
 }
 .contact-channels {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem 1.5rem;
-  margin-top: 2rem;
+  display: grid;
+  gap: 1.25rem;
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
 }
-.contact-email {
+.contact-channels li {
+  display: grid;
+  gap: 0.35rem;
+}
+.contact-channel__label {
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.contact-channel__link {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 600;
+  text-decoration: none;
+}
+.contact-channel__link .whatsapp-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--color-brand-primary);
+}
+.contact-channel__link:hover {
+  color: var(--color-brand-primary);
+}
+.contact-channel__link:focus-visible {
+  outline: 3px solid #34d399;
+  outline-offset: 4px;
+}
+.whatsapp-icon {
+  flex: none;
+  width: 1.3rem;
+  height: 1.3rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+/* Estado depois de abrir o WhatsApp (substitui o botão de envio) */
+.form-success {
+  display: grid;
+  grid-column: 1 / -1;
+  justify-items: start;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid rgb(16 185 129 / 55%);
+  border-radius: 0.8rem;
+  background: rgb(16 185 129 / 10%);
+}
+.form-success p {
+  margin: 0;
   color: var(--color-brand-soft);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.form-success__retry {
+  color: var(--color-white);
   font-weight: 600;
   text-underline-offset: 0.2em;
 }
-.contact-email:focus-visible {
-  outline: 3px solid #34d399;
-  outline-offset: 4px;
+.form-reset {
+  min-height: 2.75rem;
+  padding: 0.5rem 0;
+  border: 0;
+  background: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  font: 500 0.9rem var(--font-interface);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.form-reset:hover {
+  color: var(--color-white);
 }
 .contact-form {
   display: grid;

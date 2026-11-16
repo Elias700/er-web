@@ -1,7 +1,8 @@
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { SITE_CONFIG, whatsappLink } from '../config/site.config';
 
-export interface ContactMessage {
+/** Valores do formulário de contato. `projectType` já é o texto da opção (ex.: "Não sei"). */
+export interface ContactFormValue {
   readonly name: string;
   readonly email: string;
   readonly phone: string;
@@ -10,67 +11,93 @@ export interface ContactMessage {
 }
 
 /**
- * Contrato do serviço de envio. Para ligar EmailJS, Formspree ou um backend,
- * crie uma classe que implemente esta interface e registre em app.config.ts:
- *
- *   { provide: CONTACT_TRANSPORT, useClass: FormspreeTransport }
- *
- * Exemplo com Formspree (sem dependência nova, só fetch):
- *
- *   export class FormspreeTransport implements ContactTransport {
- *     async send(message: ContactMessage): Promise<void> {
- *       const response = await fetch('https://formspree.io/f/SEU_ID', {
- *         method: 'POST',
- *         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
- *         body: JSON.stringify(message),
- *       });
- *       if (!response.ok) throw new Error('Falha no envio');
- *     }
- *   }
+ * Monta a mensagem do WhatsApp. Função pura: mesma entrada, mesma saída.
+ * - remove espaços no início e no fim de cada campo;
+ * - omite a linha inteira de qualquer campo vazio;
+ * - `*texto*` vira negrito no WhatsApp.
+ * A codificação para URL (encodeURIComponent) é feita em `whatsappLink`.
  */
-export interface ContactTransport {
-  send(message: ContactMessage): Promise<void>;
+export function buildWhatsAppMessage(
+  form: ContactFormValue,
+  greeting: string = SITE_CONFIG.whatsapp.greeting,
+): string {
+  const fields: readonly [label: string, value: string][] = [
+    ['Nome', form.name],
+    ['E-mail', form.email],
+    ['WhatsApp', form.phone],
+    ['Tipo de projeto', form.projectType],
+    ['Mensagem', form.message],
+  ];
+  const lines = fields
+    .map(([label, value]) => [label, value.trim()] as const)
+    .filter(([, value]) => value !== '')
+    .map(([label, value]) => `*${label}:* ${value}`);
+
+  return [greeting.trim(), '', ...lines, '', 'Aguardo seu retorno!'].join('\n');
 }
 
-// TODO: registrar um ContactTransport em app.config.ts para ativar o envio pelo formulário.
-export const CONTACT_TRANSPORT = new InjectionToken<ContactTransport | null>('CONTACT_TRANSPORT', {
-  providedIn: 'root',
-  factory: () => null,
-});
+/** Resultado de um envio. */
+export type ContactResult =
+  /** Abrir uma URL (ex.: WhatsApp). Deve ser aberta no mesmo clique, sem await antes. */
+  | { readonly kind: 'redirect'; readonly url: string }
+  /** Mensagem entregue por um serviço (ex.: e-mail). */
+  | { readonly kind: 'sent' };
 
-/** Como o formulário vai entregar a mensagem, conforme o que estiver configurado. */
-export type ContactMode = 'transport' | 'whatsapp' | 'unavailable';
+/**
+ * Estratégia de envio. Hoje só existe a do WhatsApp. Para enviar por e-mail
+ * (ex.: Web3Forms), crie outra classe e registre em app.config.ts:
+ *
+ *   { provide: CONTACT_STRATEGY, useClass: Web3FormsContactStrategy }
+ *
+ *   export class Web3FormsContactStrategy implements ContactStrategy {
+ *     readonly id = 'email';
+ *     async send(form: ContactFormValue): Promise<ContactResult> {
+ *       const response = await fetch('https://api.web3forms.com/submit', {
+ *         method: 'POST',
+ *         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+ *         body: JSON.stringify({ access_key: 'SUA_CHAVE', ...form }),
+ *       });
+ *       if (!response.ok) throw new Error('Falha no envio');
+ *       return { kind: 'sent' };
+ *     }
+ *   }
+ *
+ * O componente não muda: ele trata 'redirect' (abre a URL) e 'sent' (mostra sucesso).
+ */
+export interface ContactStrategy {
+  readonly id: 'whatsapp' | 'email';
+  send(form: ContactFormValue): ContactResult | Promise<ContactResult>;
+}
+
+@Injectable({ providedIn: 'root' })
+export class WhatsAppContactStrategy implements ContactStrategy {
+  readonly id = 'whatsapp' as const;
+
+  send(form: ContactFormValue): ContactResult {
+    const url = whatsappLink(buildWhatsAppMessage(form));
+    if (!url) throw new Error('Número de WhatsApp não configurado em site.config.ts.');
+    return { kind: 'redirect', url };
+  }
+}
+
+export const CONTACT_STRATEGY = new InjectionToken<ContactStrategy>('CONTACT_STRATEGY', {
+  providedIn: 'root',
+  factory: () => inject(WhatsAppContactStrategy),
+});
 
 @Injectable({ providedIn: 'root' })
 export class ContactService {
-  private readonly transport = inject(CONTACT_TRANSPORT);
+  private readonly strategy = inject(CONTACT_STRATEGY);
 
-  readonly mode: ContactMode = this.transport
-    ? 'transport'
-    : whatsappLink()
-      ? 'whatsapp'
-      : 'unavailable';
+  /** Qual canal está ativo ('whatsapp' ou 'email'). */
+  readonly channel = this.strategy.id;
 
-  send(message: ContactMessage): Promise<void> {
-    if (!this.transport) return Promise.reject(new Error('Serviço de envio não configurado.'));
-    return this.transport.send(message);
+  /** Mesma função pura, exposta pelo serviço. */
+  buildWhatsAppMessage(form: ContactFormValue): string {
+    return buildWhatsAppMessage(form);
   }
 
-  /** Link do WhatsApp com a mensagem montada a partir do formulário. */
-  whatsappUrl(message: ContactMessage): string | null {
-    const details = [
-      `*Nome:* ${message.name}`,
-      `*E-mail:* ${message.email}`,
-      message.phone && `*WhatsApp:* ${message.phone}`,
-      message.projectType && `*Tipo de projeto:* ${message.projectType}`,
-    ].filter(Boolean);
-    const text = [
-      `Olá! Vim pelo site da ${SITE_CONFIG.companyName}.`,
-      '',
-      ...details,
-      '',
-      message.message,
-    ].join('\n');
-    return whatsappLink(text);
+  send(form: ContactFormValue): ContactResult | Promise<ContactResult> {
+    return this.strategy.send(form);
   }
 }
