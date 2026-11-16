@@ -545,7 +545,7 @@ export class FinalCtaSectionComponent {}
 export class ContactSectionComponent {
   private readonly formBuilder = inject(FormBuilder).nonNullable;
   private readonly contact = inject(ContactService);
-  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
   private readonly injector = inject(Injector);
   protected readonly mode = this.contact.mode;
   protected readonly whatsapp = whatsappLink();
