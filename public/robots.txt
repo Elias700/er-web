@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# TODO: descomente com o domínio final do site
+# Sitemap: https://seudominio.com.br/sitemap.xml
