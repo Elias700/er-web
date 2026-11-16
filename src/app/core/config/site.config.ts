@@ -40,8 +40,8 @@ export const SITE_CONFIG: SiteConfig = {
     defaultMessage: 'Olá! Vim pelo site da ER WEB e gostaria de solicitar um orçamento.',
   },
   social: {
-    instagram: '', // TODO: link do perfil, ex.: 'https://instagram.com/erweb'
-    facebook: '', // TODO: link da página, ex.: 'https://facebook.com/erweb'
+    instagram: 'https://www.instagram.com/er.web_/',
+    facebook: 'https://www.facebook.com/profile.php?id=61596543155702',
     linkedin: '', // opcional: 'https://linkedin.com/in/seu-perfil'
   },
   areaServed: 'Brasil', // TODO: confirmar região atendida
