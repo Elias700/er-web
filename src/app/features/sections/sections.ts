@@ -224,13 +224,15 @@ export class IncludedSectionComponent {
     aria-labelledby="about-title"
   >
     <div class="section-wrap about-layout">
-      <div class="about-photo" [class.about-photo--empty]="!photo" [appParallax]="18">
-        @if (photo) {
+      <div class="about-photo" [class.about-photo--empty]="!photo.src" [appParallax]="18">
+        @if (photo.src) {
           <img
-            [src]="photo"
+            [src]="photo.src"
+            [attr.srcset]="photo.srcset || null"
+            sizes="(max-width: 800px) 92vw, 40vw"
             [alt]="photoAlt"
-            width="800"
-            height="1000"
+            width="1086"
+            height="1448"
             loading="lazy"
             decoding="async"
           />

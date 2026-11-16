@@ -24,8 +24,11 @@ export interface SiteConfig {
   readonly areaServed: string;
   /** Mostra a seção de depoimentos e o link no menu. Só ative com depoimentos reais. */
   readonly showTestimonials: boolean;
-  /** Caminho da foto do Sobre (em /public). Deixe '' enquanto a foto não existir. */
-  readonly aboutPhoto: string;
+  /**
+   * Foto do Sobre (arquivos em /public). `src` vazio mostra o placeholder.
+   * `srcset` lista versões menores para celular.
+   */
+  readonly aboutPhoto: { readonly src: string; readonly srcset: string };
 }
 
 export const SITE_CONFIG: SiteConfig = {
@@ -46,7 +49,10 @@ export const SITE_CONFIG: SiteConfig = {
   },
   areaServed: 'Brasil', // TODO: confirmar região atendida
   showTestimonials: false,
-  aboutPhoto: '', // TODO: '/assets/images/elias.webp' quando a foto for adicionada
+  aboutPhoto: {
+    src: '/assets/images/elias-1086.webp',
+    srcset: '/assets/images/elias-600.webp 600w, /assets/images/elias-1086.webp 1086w',
+  },
 };
 
 /** Monta o link do WhatsApp. Retorna null se o número não estiver configurado. */
